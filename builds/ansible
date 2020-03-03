@@ -1,0 +1,15 @@
+FROM docker.io/library/fedora:31
+
+# Configure dnf
+RUN echo "fastestmirror=1" >> /etc/dnf/dnf.conf
+RUN echo "install_weak_deps=0" >> /etc/dnf/dnf.conf
+
+# Remove the Modular repositories. This speeds up the build and avoids some
+# repository errors, especially in unreleased Fedora versions.
+RUN rm -fv /etc/yum.repos.d/fedora*modular*
+
+# Install requirements for building RPMs.
+RUN dnf -y install ansible git openssh openssh-clients
+
+# Clean up.
+RUN dnf clean all
