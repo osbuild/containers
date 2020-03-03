@@ -13,3 +13,6 @@ RUN dnf -y install ansible git openssh openssh-clients
 
 # Clean up.
 RUN dnf clean all
+
+# Make Ansible happy with arbitrary UID/GID in OpenShift.
+RUN chmod g=u /etc/passwd /etc/group
