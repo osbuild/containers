@@ -11,7 +11,7 @@ on:
       - master
   schedule:
     # Build containers on weekdays at 6AM UTC.
-    - cron: "0 6 * * 1,2,3,4,5"
+    - cron: "0 5 * * 1,2,3,4,5"
 
 jobs:
   build:
