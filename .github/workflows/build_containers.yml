@@ -26,7 +26,7 @@ jobs:
       - name: Clone repository
         uses: actions/checkout@v2
 
-      - name: Build Fedora 31 container
+      - name: "Build ${{ matrix.containers.name }} container"
         run: |
           docker build -f builds/${{ matrix.containers.file }} \
             -t quay.io/osbuild/${{ matrix.containers.name }}:latest .
