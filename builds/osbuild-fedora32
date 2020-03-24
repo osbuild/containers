@@ -1,13 +1,15 @@
-FROM docker.io/library/fedora:31
+FROM docker.io/library/fedora:32
 
 # Configure dnf
 RUN echo "fastestmirror=1" >> /etc/dnf/dnf.conf && \
-      echo "install_weak_deps=0" >> /etc/dnf/dnf.conf \
+      echo "install_weak_deps=0" >> /etc/dnf/dnf.conf && \
       rm -fv /etc/yum.repos.d/fedora*modular*
 
 # Install requirements for building RPMs.
 RUN dnf -y upgrade && \
-      dnf -y install ansible git openssh openssh-clients && \
+      dnf -y install dnf-plugins-core findutils git make python3-docutils \
+        python3-devel python3-rpm-generators python-rpm-macros \
+        python3-rpm-macros rpm-build rpmdevtools && \
       dnf clean all
 
 # Make Ansible happy with arbitrary UID/GID in OpenShift.
