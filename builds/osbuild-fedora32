@@ -1,9 +1,12 @@
 FROM docker.io/library/fedora:32
 
+# Hack the repo files to use mirrors.kernel.org until the release is ready.
+COPY files/32/ /etc/yum.repos.d/
+
 # Configure dnf
 RUN echo "fastestmirror=1" >> /etc/dnf/dnf.conf && \
       echo "install_weak_deps=0" >> /etc/dnf/dnf.conf && \
-      rm -fv /etc/yum.repos.d/fedora*modular*
+      rm -fv /etc/yum.repos.d/fedora*modular* /etc/yum.repos.d/fedora*testing*
 
 # Install requirements for building RPMs.
 RUN dnf -y upgrade && \
