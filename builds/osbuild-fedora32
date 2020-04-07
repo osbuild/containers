@@ -3,7 +3,8 @@ FROM docker.io/library/fedora:32
 # Configure dnf
 RUN echo "fastestmirror=1" >> /etc/dnf/dnf.conf && \
       echo "install_weak_deps=0" >> /etc/dnf/dnf.conf && \
-      rm -fv /etc/yum.repos.d/fedora*modular* /etc/yum.repos.d/fedora-updates*testing*
+      rm -fv /etc/yum.repos.d/fedora*modular* && \
+      dnf config-manager --set-disabled updates-testing
 
 # Install requirements for building RPMs.
 RUN dnf -y upgrade && \
