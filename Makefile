@@ -84,11 +84,14 @@ $(BUILDDIR)/%/:
 # unless volatile mode is disabled.
 #
 
-GHCI_CONTAINERS_LABEL = ghci-osbuild
+GHCI_CONTAINERS_LABEL = \
+	ghci-osbuild \
+	ghci-osbuild-fedmir
 
 GHCI_ALIAS_REGISTRY ?= $(GHCI_REGISTRY)
 GHCI_ALIAS_REPOSITORY ?= $(GHCI_REPOSITORY)
 GHCI_ALIAS_TAG ?= $(GHCI_TAG)
+GHCI_ARGS =
 GHCI_PUSH ?= false
 GHCI_REGISTRY ?= docker.pkg.github.com
 GHCI_REPOSITORY ?= osbuild/containers
@@ -104,6 +107,7 @@ $(GHCI_CONTAINERS_BUILD): x-build/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/%: .FORCE
 	$(DOCKER) build \
 		--quiet \
 		--tag "$(patsubst x-build/%,%,$@):$(GHCI_TAG)" \
+		$(GHCI_ARGS) \
 		"$(SRCDIR)/ghci/containers/$*"
 
 $(GHCI_CONTAINERS_CREATE): x-create/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/%: .FORCE
@@ -127,6 +131,11 @@ $(GHCI_CONTAINERS_ALIAS): x-alias/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/%: .FORCE
 			$(DOCKER) image rm "$(GHCI_ALIAS_REGISTRY)/$(GHCI_ALIAS_REPOSITORY)/$*:$(GHCI_ALIAS_TAG)" ; \
 			$(DOCKER) image rm "$(patsubst x-alias/%,%,$@):$(GHCI_TAG)" \
 		)
+
+x-build/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/ghci-osbuild-fedmir: GHCI_ARGS= \
+	"--build-arg=FEDMIR_ARCH=x86_64" \
+	"--build-arg=FEDMIR_PACKAGES=$$(cat $(SRCDIR)/ghci/pkglists/ghci-osbuild-fedmir)" \
+	"--build-arg=FEDMIR_RELEASE=32"
 
 .PHONY: ghci-create
 ghci-create: $(GHCI_CONTAINERS_CREATE)
