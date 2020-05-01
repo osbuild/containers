@@ -22,7 +22,7 @@ pipeline {
                 axes {
                     axis {
                         name 'CONTAINER_NAME'
-                        values 'fedora31', 'fedora32', 'fedora33', 'rhel82'
+                        values 'ansible', 'osbuild-fedora31', 'osbuild-fedora32', 'osbuild-fedora33', 'osbuild-rhel82'
                     }
                 }
                 stages {

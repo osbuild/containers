@@ -15,8 +15,8 @@ else
 fi
 
 buildah bud --squash \
-    -f builds/osbuild-${CONTAINER_NAME} \
-    -t quay.io/osbuild/osbuild-${CONTAINER_NAME}:${CONTAINER_TAG} .
+    -f builds/${CONTAINER_NAME} \
+    -t quay.io/osbuild/${CONTAINER_NAME}:${CONTAINER_TAG} .
 
 buildah  login --username ${QUAY_CREDS_USR} --password ${QUAY_CREDS_PSW} quay.io
-buildah --log-level info push quay.io/osbuild/osbuild-${CONTAINER_NAME}:${CONTAINER_TAG}
+buildah --log-level info push quay.io/osbuild/${CONTAINER_NAME}:${CONTAINER_TAG}
