@@ -1,0 +1,50 @@
+pipeline {
+    agent none
+
+    options {
+        timestamps()
+        ansiColor('xterm')
+    }
+
+    // Get quay.io credentials.
+    environment {
+        QUAY_CREDS = credentials('schutzbot-quay')
+    }
+
+    // Build new containers on weekdays.
+    triggers {
+        cron('H 0 * * 1-5')
+    }
+
+    stages {
+        stage("build") {
+            matrix {
+                axes {
+                    axis {
+                        name 'CONTAINER_NAME'
+                        values 'fedora31', 'fedora32', 'fedora33', 'rhel82'
+                    }
+                }
+                stages {
+                    stage('buildah') {
+                        agent {
+                            label 'fedora31 || fedora32'
+                        }
+                        options {
+                            retry(2)
+                        }
+                        steps {
+                            sh script: "jenkins/build.sh", label: "Build ${CONTAINER_NAME}"
+                        }
+                        // Clean up all container bits once we are finished.
+                        post {
+                            cleanup {
+                                sh script: "jenkins/cleanup.sh", label: "Clean up"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
