@@ -14,7 +14,7 @@ else
     CONTAINER_TAG=${CHANGE_BRANCH}
 fi
 
-buildah bud --squash \
+buildah bud \
     -f builds/${CONTAINER_NAME} \
     -t quay.io/osbuild/${CONTAINER_NAME}:${CONTAINER_TAG} .
 
