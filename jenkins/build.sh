@@ -8,7 +8,7 @@ if [[ ! -x /usr/bin/buildah ]] || [[ ! -x /usr/bin/podman ]]; then
     podman system prune -af
 fi
 
-if [[ ${CHANGE_BRANCH} == "master" ]]; then
+if [[ ${CHANGE_BRANCH:-master} == "master" ]]; then
     CONTAINER_TAG=latest
 else
     CONTAINER_TAG=${CHANGE_BRANCH}
