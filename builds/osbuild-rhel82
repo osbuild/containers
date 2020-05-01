@@ -1,9 +1,10 @@
-FROM docker.io/library/fedora:32
+FROM registry.access.redhat.com/ubi8/ubi:latest
+
+COPY files/rhel82.repo /etc/yum.repos.d/rhel82.repo
 
 # Configure dnf
 RUN echo "fastestmirror=1" >> /etc/dnf/dnf.conf && \
-      echo "install_weak_deps=0" >> /etc/dnf/dnf.conf && \
-      rm -fv /etc/yum.repos.d/fedora*modular*
+      echo "install_weak_deps=0" >> /etc/dnf/dnf.conf
 
 # Install requirements for building RPMs.
 RUN dnf -y upgrade && \

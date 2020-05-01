@@ -12,5 +12,12 @@ RUN dnf -y upgrade && \
         python3-rpm-macros rpm-build rpmdevtools && \
       dnf clean all
 
+# Install requirements for building osbuild and osbuild-composer.
+RUN curl -O https://raw.githubusercontent.com/osbuild/osbuild-composer/master/osbuild-composer.spec && \
+      curl -O https://raw.githubusercontent.com/osbuild/osbuild/master/osbuild.spec && \
+      dnf -y builddep osbuild-composer.spec osbuild.spec && \
+      dnf clean all && \
+      rm -f *.spec
+
 # Make Ansible happy with arbitrary UID/GID in OpenShift.
 RUN chmod g=u /etc/passwd /etc/group

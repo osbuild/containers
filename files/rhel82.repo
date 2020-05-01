@@ -1,0 +1,20 @@
+[rhel8]
+name=RHEL 8
+baseurl=http://download.eng.bos.redhat.com/redhat/rhel-8/nightly/RHEL-8/latest-RHEL-8.2.1/compose/BaseOS/x86_64/os/
+enabled=1
+gpgcheck=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+
+[rhel8-appstream]
+name=RHEL 8 Appstream
+baseurl=http://download.eng.bos.redhat.com/redhat/rhel-8/nightly/RHEL-8/latest-RHEL-8.2.1/compose/AppStream/x86_64/os/
+enabled=1
+gpgcheck=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+
+[rhel8-crb]
+name=RHEL 8 CRB
+baseurl=http://download.eng.bos.redhat.com/redhat/rhel-8/nightly/RHEL-8/latest-RHEL-8.2.1/compose/CRB/x86_64/os/
+enabled=1
+gpgcheck=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
