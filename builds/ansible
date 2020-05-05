@@ -1,4 +1,4 @@
-FROM docker.io/library/fedora:31
+FROM docker.io/library/fedora:32
 
 # Configure dnf
 RUN echo "fastestmirror=1" >> /etc/dnf/dnf.conf && \
