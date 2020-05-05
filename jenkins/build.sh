@@ -1,6 +1,9 @@
 #!/bin/bash
 set -euxo pipefail
 
+# Buildah on Fedora 32 has some interesting interations with SELinux.
+sudo setenforce 0
+
 echo "Building container ${CONTAINER_NAME}..."
 
 if [[ ! -x /usr/bin/buildah ]] || [[ ! -x /usr/bin/podman ]]; then
