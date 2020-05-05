@@ -1,5 +1,5 @@
 pipeline {
-    agent none
+    agent { label 'fedora31 || fedora32' }
 
     options {
         timestamps()
@@ -18,32 +18,33 @@ pipeline {
 
     stages {
         stage("build") {
-            matrix {
-                axes {
-                    axis {
-                        name 'CONTAINER_NAME'
-                        values 'ansible', 'osbuild-fedora31', 'osbuild-fedora32', 'osbuild-fedora33', 'osbuild-rhel82'
-                    }
+            parallel {
+
+                stage('ansible') {
+                    environment { CONTAINER_NAME = 'ansible' }
+                    steps { sh "jenkins/build.sh" }
                 }
-                stages {
-                    stage('buildah') {
-                        agent {
-                            label 'fedora31 || fedora32'
-                        }
-                        options {
-                            retry(2)
-                        }
-                        steps {
-                            sh script: "jenkins/build.sh", label: "Build ${CONTAINER_NAME}"
-                        }
-                        // Clean up all container bits once we are finished.
-                        post {
-                            cleanup {
-                                sh script: "jenkins/cleanup.sh", label: "Clean up"
-                            }
-                        }
-                    }
+
+                stage('fedora31') {
+                    environment { CONTAINER_NAME = 'osbuild-fedora31' }
+                    steps { sh "jenkins/build.sh" }
                 }
+
+                stage('fedora32') {
+                    environment { CONTAINER_NAME = 'osbuild-fedora32' }
+                    steps { sh "jenkins/build.sh" }
+                }
+
+                stage('fedora33') {
+                    environment { CONTAINER_NAME = 'osbuild-fedora33' }
+                    steps { sh "jenkins/build.sh" }
+                }
+
+                stage('rhel82') {
+                    environment { CONTAINER_NAME = 'osbuild-rhel82' }
+                    steps { sh "jenkins/build.sh" }
+                }
+
             }
         }
     }
