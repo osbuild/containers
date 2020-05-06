@@ -1,0 +1,73 @@
+#
+# GHCI Management
+#
+# This workflow manages the GitHub CI infrastructure. It does not execute the
+# CI, but instead builds the required containers, prepares the infrastructure,
+# and deploys required services.
+#
+
+name: "GHCI Management"
+
+on:
+  pull_request:
+    branches:
+    - "ghci/*"
+  push:
+    branches:
+    - "ghci/*"
+    tags:
+    - "ghci/*"
+
+jobs:
+  #
+  # Create Containers
+  #
+  # This job builds and optionally pushes containers from `./ghci/containers/`
+  # to github-packages. Depending on the source ref, a different operation is
+  # performed:
+  #
+  #   * `refs/tags/ghci/rcX`: If a tag like `ghci/rc71` is pushed, all
+  #     containers are built and pushed to github-packages with that tag-name.
+  #
+  #   * In all other cases, the containers are built but immediately discarded.
+  #
+  create_containers:
+    name: "Create Containers"
+    runs-on: ubuntu-latest
+    steps:
+    - name: "Clone Repository"
+      uses: actions/checkout@v2
+    - name: "Authenticate to GitHub Packages"
+      run: docker login docker.pkg.github.com -u "${{ github.actor }}" -p "${{ github.token }}"
+    - name: "Build and Push Containers"
+      run: |
+        make \
+          "GHCI_PUSH=${{ startsWith(github.ref, 'refs/tags/ghci/rc') }}" \
+          "GHCI_REPOSITORY=${{ github.repository }}" \
+          'GHCI_TAG=`echo "${{ github.ref }}" | sed -e "s|.*/ghci/||"`' \
+          ghci-create
+
+  #
+  # Test Custom Github-Actions
+  #
+  # A simple job that runs the github-actions integration provided by the
+  # scripts in `./ghci/actions/`.
+  #
+  test_actions:
+    name: "Test Custom Github-Actions"
+    runs-on: ubuntu-latest
+    steps:
+    - name: "Clone Repository"
+      uses: actions/checkout@v2
+    - name: "Run Local CI Test Action"
+      uses: ./ghci/actions/ghci-osbuild
+      with:
+        run: |
+          echo Foo
+          echo Bar
+    - name: "Run Release CI Test Action"
+      uses: osbuild/containers/ghci/actions/ghci-osbuild@ghci/v1
+      with:
+        run: |
+          echo Foo
+          echo Bar
