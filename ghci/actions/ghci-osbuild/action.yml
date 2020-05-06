@@ -1,0 +1,51 @@
+#
+# ghci-osbuild - Github Actions for osbuild CI
+#
+# This is a Github-Actions wrapper to run a command in the `ghci-osbuild`
+# container fully privileged and prepared to execute `osbuild` in a contained
+# environment.
+#
+
+name: 'OSBuild CI with Github Actions'
+description: 'Github Actions integration for running commands in the osbuild ci'
+inputs:
+  actor:
+    description: >
+      GitHub username to act as. This is mainly required to authenticate to
+      GitHub Packages, and even in that case GitHub allows any value as actor.
+
+      This uses `github.actor` by default.
+    default: ${{ github.actor }}
+  image:
+    description: >
+      The image to execute the commands in. Any docker image URL can be
+      specified. The working directory is mounted into `/ci/workdir` before
+      the container is executed.
+
+      This uses `ghci-osbuild:v1` on GitHub Packages by default.
+    default: 'docker.pkg.github.com/osbuild/containers/ghci-osbuild:v1'
+  run:
+    description: >
+      Commands to execute in the container. This is passed to a `bash` shell
+      in the container after all setup operations are done. This is executed
+      with full root privileges through `bash -c "ARGS"`.
+
+      This prints "Nothing to do." by default.
+    default: 'echo "Nothing to do."'
+  token:
+    description: >
+      Personal Access Token used to authenticate to GitHub Packages before
+      fetching required containers. This is required, because GitHub Packages
+      needs authentication even for read-access on public repositories. This
+      might be changed in the future.
+
+      This will use `docker login` to authenticate with this token and the
+      specified actor. Subsequent docker operations will have access to this.
+
+      If this is an empty token, no authentication is performed.
+
+      This uses `github.token` by default.
+    default: ${{ github.token }}
+runs:
+  using: 'node12'
+  main: 'index.js'
