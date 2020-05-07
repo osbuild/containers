@@ -58,8 +58,8 @@ try {
                                 '--volume=/lib/modules/' + arg_os_release + ':/usr/lib/modules/' + arg_os_release,
                                 arg_image,
                                 '/bin/bash',
-                                        '-c',
-                                        arg_run
+                                        '-o', 'errexit',
+                                        '-c', arg_run
                 ],
                 {
                         stdio: 'inherit'
