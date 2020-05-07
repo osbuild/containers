@@ -7,7 +7,7 @@ try {
         const arg_run = String(core.getInput('run'));
         const arg_token = String(core.getInput('token'));
 
-        arg_cwd = process.cwd()
+        arg_cwd = process.cwd();
 
         if (arg_token.length > 0) {
                 console.log('Authenticate to GitHub Packages');
