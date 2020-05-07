@@ -1,5 +1,4 @@
 const core = require('@actions/core');
-const os = require('os');
 const proc = require('child_process');
 
 try {
@@ -9,7 +8,6 @@ try {
         const arg_token = String(core.getInput('token'));
 
         arg_cwd = process.cwd();
-        arg_os_release = os.release();
 
         if (arg_token.length > 0) {
                 console.log('Authenticate to GitHub Packages');
@@ -55,7 +53,7 @@ try {
                                 '--privileged',
                                 '--rm',
                                 '--volume=' + arg_cwd + ':/ci/workdir',
-                                '--volume=/lib/modules/' + arg_os_release + ':/usr/lib/modules/' + arg_os_release,
+                                '--volume=/lib/modules/:/lib/modules/',
                                 arg_image,
                                 '/bin/bash',
                                         '-o', 'errexit',
