@@ -55,7 +55,7 @@ try {
                                 '--privileged',
                                 '--rm',
                                 '--volume=' + arg_cwd + ':/ci/workdir',
-                                '--volume=/usr/lib/modules/' + arg_os_release + ':/usr/lib/modules/' + arg_os_release,
+                                '--volume=/lib/modules/' + arg_os_release + ':/usr/lib/modules/' + arg_os_release,
                                 arg_image,
                                 '/bin/bash',
                                         '-c',
