@@ -22,30 +22,37 @@ pipeline {
 
                 stage('ansible') {
                     environment { CONTAINER_NAME = 'ansible' }
-                    steps { sh "jenkins/build.sh" }
+                    steps { sh "schutzbot/build.sh" }
                 }
 
                 stage('fedora31') {
                     environment { CONTAINER_NAME = 'osbuild-fedora31' }
-                    steps { sh "jenkins/build.sh" }
+                    steps { sh "schutzbot/build.sh" }
                 }
 
                 stage('fedora32') {
                     environment { CONTAINER_NAME = 'osbuild-fedora32' }
-                    steps { sh "jenkins/build.sh" }
+                    steps { sh "schutzbot/build.sh" }
                 }
 
                 stage('fedora33') {
                     environment { CONTAINER_NAME = 'osbuild-fedora33' }
-                    steps { sh "jenkins/build.sh" }
+                    steps { sh "schutzbot/build.sh" }
                 }
 
                 stage('rhel82') {
                     environment { CONTAINER_NAME = 'osbuild-rhel82' }
-                    steps { sh "jenkins/build.sh" }
+                    steps { sh "schutzbot/build.sh" }
                 }
 
             }
+
+            post {
+                always {
+                    sh "buildah logout --all || true"
+                }
+            }
+
         }
     }
 }
