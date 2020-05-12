@@ -37,14 +37,7 @@ ARG     FEDMIR_HOST="docker.io/library/httpd:2.4"
 # Fetch our build environment.
 FROM    "${FEDMIR_BUILD}" AS build
 
-# Update DNF and install our setup utilities.
-RUN     dnf -y upgrade \
-        && dnf -y install \
-                "createrepo" \
-        && dnf clean all
-
-# Import our mirror parameters. Do this as late as possible, to make sure we
-# can cache the previous steps regardless of the values of these arguments.
+# Import our mirror parameters.
 ARG     FEDMIR_ARCH
 ARG     FEDMIR_PACKAGES
 ARG     FEDMIR_RELEASE
@@ -52,6 +45,12 @@ ARG     FEDMIR_RELEASE
 # Prepare our package repository in /srv.
 ENV     FEDMIR_PATH "/srv/www/fedmir/fedora-${FEDMIR_RELEASE}/arch-${FEDMIR_ARCH}/"
 RUN     mkdir -p "${FEDMIR_PATH}"/{packages,root}
+
+# Update DNF and install our setup utilities.
+RUN     dnf -y upgrade \
+        && dnf -y install \
+                "createrepo" \
+        && dnf clean all
 
 # Fetch all packages we want to mirror.
 RUN     dnf -y install \
