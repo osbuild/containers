@@ -84,6 +84,8 @@ $(BUILDDIR)/%/:
 # unless volatile mode is disabled.
 #
 
+GHCI_CONTAINERS_LABEL = ghci-osbuild
+
 GHCI_ALIAS_REGISTRY ?= $(GHCI_REGISTRY)
 GHCI_ALIAS_REPOSITORY ?= $(GHCI_REPOSITORY)
 GHCI_ALIAS_TAG ?= $(GHCI_TAG)
@@ -93,9 +95,6 @@ GHCI_REPOSITORY ?= osbuild/containers
 GHCI_TAG_PROPOSED := volatile-$(RANDOM)
 GHCI_TAG ?= $(GHCI_TAG_PROPOSED)
 GHCI_VOLATILE ?= true
-
-GHCI_CONTAINERS_DIR = $(wildcard $(SRCDIR)/ghci/containers/*)
-GHCI_CONTAINERS_LABEL = $(patsubst $(SRCDIR)/ghci/containers/%,%,$(GHCI_CONTAINERS_DIR))
 
 GHCI_CONTAINERS_BUILD = $(patsubst %,x-build/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/%,$(GHCI_CONTAINERS_LABEL))
 GHCI_CONTAINERS_CREATE = $(patsubst %,x-create/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/%,$(GHCI_CONTAINERS_LABEL))
