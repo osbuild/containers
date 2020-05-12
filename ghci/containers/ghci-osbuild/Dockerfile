@@ -24,17 +24,14 @@ FROM    "${CI_HOST}" AS host
 # Import our image parameters.
 ARG     CI_PACKAGES
 
-# Update local system.
+# Update local system, install groups and CI packages.
 RUN     dnf \
                 -y \
                 --nodocs \
                 --setopt=fastestmirror=True \
                 --setopt=install_weak_deps=False \
                 upgrade \
-        && dnf clean all
-
-# Install basic package groups.
-RUN     dnf \
+        && dnf \
                 -y \
                 --nodocs \
                 --setopt=fastestmirror=True \
@@ -42,10 +39,7 @@ RUN     dnf \
                 group install \
                         'Development Tools' \
                         'RPM Development Tools' \
-        && dnf clean all
-
-# Install CI dependencies.
-RUN     dnf \
+        && dnf \
                 -y \
                 --nodocs \
                 --setopt=fastestmirror=True \
