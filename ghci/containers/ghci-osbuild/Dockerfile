@@ -10,12 +10,19 @@
 #   * CI_HOST="docker.io/library/fedora:latest"
 #       This controls the host container used as base for the CI image.
 #
+#   * CI_PACKAGES=?
+#       Specify the packages to include in the image. Separate packages by
+#       space. All their dependencies will be included as well.
+#
 
 # Import container arguments (must be before any `FROM`).
 ARG     CI_HOST="docker.io/library/fedora:latest"
 
 # Fetch our host environment.
 FROM    "${CI_HOST}" AS host
+
+# Import our image parameters.
+ARG     CI_PACKAGES
 
 # Update local system.
 RUN     dnf \
@@ -44,39 +51,7 @@ RUN     dnf \
                 --setopt=fastestmirror=True \
                 --setopt=install_weak_deps=False \
                 install \
-                        bash \
-                        coreutils \
-                        curl \
-                        dnf \
-                        dnf-plugins-core \
-                        e2fsprogs \
-                        findutils \
-                        git \
-                        glibc \
-                        iproute \
-                        make \
-                        nbd \
-                        nbd-cli \
-                        ostree \
-                        policycoreutils \
-                        pylint \
-                        python-rpm-macros \
-                        python3-docutils \
-                        python3-devel \
-                        python3-jsonschema \
-                        python3-pylint \
-                        python3-rpm-generators \
-                        python3-rpm-macros \
-                        qemu-img \
-                        qemu-system-x86 \
-                        rpm \
-                        rpm-build \
-                        rpm-ostree \
-                        rpmdevtools \
-                        systemd \
-                        systemd-container \
-                        tar \
-                        util-linux \
+                        ${CI_PACKAGES} \
         && dnf clean all
 
 # Create our working environment.

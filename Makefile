@@ -134,6 +134,9 @@ $(GHCI_CONTAINERS_ALIAS): x-alias/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/%: .FORCE
 			$(DOCKER) image rm "$(patsubst x-alias/%,%,$@):$(GHCI_TAG)" \
 		)
 
+x-build/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/ghci-osbuild: GHCI_ARGS= \
+	"--build-arg=CI_PACKAGES=$$(cat $(SRCDIR)/ghci/pkglists/ghci-osbuild)"
+
 x-build/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/ghci-osbuild-fedmir: GHCI_ARGS= \
 	"--build-arg=FEDMIR_ARCH=x86_64" \
 	"--build-arg=FEDMIR_PACKAGES=$$(cat $(SRCDIR)/ghci/pkglists/ghci-osbuild-fedmir)" \
