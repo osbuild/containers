@@ -119,7 +119,9 @@ $(GHCI_CONTAINERS_CREATE): x-create/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/%: .FORC
 
 $(GHCI_CONTAINERS_ALIAS): x-alias/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/%: .FORCE
 	[[ "$(GHCI_ALIAS_REGISTRY)/$(GHCI_ALIAS_REPOSITORY)/$*:$(GHCI_ALIAS_TAG)" != "$(patsubst x-alias/%,%,$@):$(GHCI_TAG)" ]] || exit 1
-	$(MAKE) "$(patsubst x-alias/%,x-build/%,$@)" "GHCI_TAG=$(GHCI_TAG)"
+	$(DOCKER) pull \
+		--quiet \
+		"$(patsubst x-alias/%,%,$@):$(GHCI_TAG)"
 	$(DOCKER) tag \
 		"$(patsubst x-alias/%,%,$@):$(GHCI_TAG)" \
 		"$(GHCI_ALIAS_REGISTRY)/$(GHCI_ALIAS_REPOSITORY)/$*:$(GHCI_ALIAS_TAG)"
