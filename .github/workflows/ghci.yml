@@ -11,12 +11,12 @@ name: "GHCI Management"
 on:
   pull_request:
     branches:
-    - "ghci/*"
+    - "ghci/**"
   push:
     branches:
-    - "ghci/*"
+    - "ghci/**"
     tags:
-    - "ghci/*"
+    - "ghci/**"
 
 jobs:
   #
@@ -44,7 +44,7 @@ jobs:
         make \
           "GHCI_PUSH=${{ startsWith(github.ref, 'refs/tags/ghci/rc') }}" \
           "GHCI_REPOSITORY=${{ github.repository }}" \
-          'GHCI_TAG=`echo "${{ github.ref }}" | sed -e "s|.*/ghci/||"`' \
+          'GHCI_TAG=`echo "${{ github.ref }}" | sed -e "s|.*/ghci.*/||"`' \
           ghci-create
     - name: "Mirror Containers on Quay.io"
       if: ${{ github.repository == 'osbuild/containers' && startsWith(github.ref, 'refs/tags/ghci/rc') }}
@@ -54,7 +54,7 @@ jobs:
           "GHCI_ALIAS_REGISTRY=quay.io" \
           "GHCI_ALIAS_REPOSITORY=osbuild" \
           "GHCI_PUSH=true" \
-          'GHCI_TAG=`echo "${{ github.ref }}" | sed -e "s|.*/ghci/||"`' \
+          'GHCI_TAG=`echo "${{ github.ref }}" | sed -e "s|.*/ghci.*/||"`' \
           ghci-alias
 
   #
@@ -69,6 +69,7 @@ jobs:
     steps:
     - name: "Clone Repository"
       uses: actions/checkout@v2
+
     - name: "Run Local CI Test Action"
       uses: ./ghci/actions/ghci-osbuild
       with:
