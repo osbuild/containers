@@ -26,8 +26,14 @@ jobs:
   # to github-packages. Depending on the source ref, a different operation is
   # performed:
   #
-  #   * `refs/tags/ghci/rcX`: If a tag like `ghci/rc71` is pushed, all
-  #     containers are built and pushed to github-packages with that tag-name.
+  #   * `refs/*/ghci/abc/xyz`: If a ref with name `ghci/abc/xyz` is pushed,
+  #     the container `abc` is built with tag-name `xyz`.
+  #
+  #   * `refs/*/ghci/all/xyz`: This is a special case of the previous one which
+  #     builds all containers.
+  #
+  #   * `refs/*/ghci/abc/rcXYZ`: This is a special case which pushes containers
+  #     out to the registries, whenever their tag starts with `rc*`.
   #
   #   * In all other cases, the containers are built but immediately discarded.
   #
@@ -35,27 +41,73 @@ jobs:
     name: "Create Containers"
     runs-on: ubuntu-latest
     steps:
+      #
+      # Job Variables
+      #
+      # This step sets some output variables for use in later steps. See each
+      # variable for details.
+      #
+      #     ${{ steps.vars.outputs.PUSH }}
+      #         Whether to push images or not (`true` or `false`).
+      #
+      #     ${{ steps.vars.outputs.GROUP }}
+      #         If the ref-name matches `a/b`, this is set to `a`.
+      #
+      #     ${{ steps.vars.outputs.TAG }}
+      #         If the ref-name matches `a/b`, this is set to `b`.
+      #
+    - name: "Job Variables"
+      id: vars
+      env:
+        ENV_GITHUB_REF: ${{ github.ref }}
+        ENV_GITHUB_REPOSITORY: ${{ github.repository }}
+      run: |
+        if [[ "${ENV_GITHUB_REF}" =~ ^refs/[^/]+/ghci/[^/]+/[^/]+$ ]] ; then
+          GROUP=$(echo "${ENV_GITHUB_REF}" | sed -e 's|.*/.*/.*/\(.*\)/.*|\1|')
+          TAG=$(echo "${ENV_GITHUB_REF}" | sed -e 's|.*/.*/.*/.*/\(.*\)|\1|')
+        else
+          GROUP="all"
+          TAG="latest"
+        fi
+
+        PUSH="false"
+        if [[ "${ENV_GITHUB_REPOSITORY}" = "osbuild/containers" \
+              && "${TAG}" =~ ^rc ]] ; then
+          PUSH="true"
+        fi
+
+        echo "::set-output name=PUSH::${PUSH}"
+        echo "::set-output name=GROUP::${GROUP}"
+        echo "::set-output name=TAG::${TAG}"
+    - name: "Print Variables"
+      run: |
+        echo "PUSH: ${{ steps.vars.outputs.PUSH }}"
+        echo "GROUP: ${{ steps.vars.outputs.GROUP }}"
+        echo "TAG: ${{ steps.vars.outputs.TAG }}"
+
     - name: "Clone Repository"
       uses: actions/checkout@v2
     - name: "Authenticate to GitHub Packages"
       run: docker login docker.pkg.github.com -u "${{ github.actor }}" -p "${{ github.token }}"
+
     - name: "Build and Push Containers"
       run: |
         make \
-          "GHCI_PUSH=${{ startsWith(github.ref, 'refs/tags/ghci/rc') }}" \
+          "GHCI_PUSH=${{ steps.vars.outputs.PUSH }}" \
           "GHCI_REPOSITORY=${{ github.repository }}" \
-          'GHCI_TAG=`echo "${{ github.ref }}" | sed -e "s|.*/ghci.*/||"`' \
-          ghci-create
+          "GHCI_TAG=${{ steps.vars.outputs.TAG }}" \
+          "ghci-create-${{ steps.vars.outputs.GROUP }}"
+
     - name: "Mirror Containers on Quay.io"
-      if: ${{ github.repository == 'osbuild/containers' && startsWith(github.ref, 'refs/tags/ghci/rc') }}
+      if: ${{ steps.vars.outputs.PUSH == 'true' }}
       run: |
         docker login quay.io -u "osbuild+github_actions" -p "${{ secrets.QUAY_TOKEN }}"
         make \
           "GHCI_ALIAS_REGISTRY=quay.io" \
           "GHCI_ALIAS_REPOSITORY=osbuild" \
           "GHCI_PUSH=true" \
-          'GHCI_TAG=`echo "${{ github.ref }}" | sed -e "s|.*/ghci.*/||"`' \
-          ghci-alias
+          "GHCI_TAG=${{ steps.vars.outputs.TAG }}" \
+          "ghci-alias-${{ steps.vars.outputs.GROUP }}"
 
   #
   # Test Custom Github-Actions
@@ -79,6 +131,10 @@ jobs:
 
     - name: "Run Local NetWait Action"
       uses: ./ghci/actions/netwait
+      with:
+        port: "8080"
+    - name: "Run Release NetWait Action"
+      uses: osbuild/containers/ghci/actions/netwait@ghci/v1
       with:
         port: "8080"
 
