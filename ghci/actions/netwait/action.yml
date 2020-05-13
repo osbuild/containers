@@ -1,0 +1,31 @@
+#
+# netwait - Wait for Network Nodes
+#
+# This Github-Action takes a network host as well as a TCP port and waits for
+# that network node to become available.
+#
+
+name: 'Wait for Network Nodes'
+description: 'Wait for specified TCP ports to be available'
+inputs:
+  host:
+    description: >
+      The hostname to connect to and check for network availability.
+
+      This uses `localhost` by default.
+    default: 'localhost'
+  port:
+    description: >
+      The TCP port to connect to and check for network availability.
+
+      This uses `80` by default.
+    default: 80
+  timeout:
+    description: >
+      The timeout in seconds after which to abort and raise an error.
+
+      This uses `16` by default.
+    default: 16
+runs:
+  using: 'node12'
+  main: 'index.js'

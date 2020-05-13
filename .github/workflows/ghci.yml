@@ -66,9 +66,21 @@ jobs:
   test_actions:
     name: "Test Custom Github-Actions"
     runs-on: ubuntu-latest
+
+    services:
+      httpd:
+        image: "httpd"
+        ports:
+        - "8080:80"
+
     steps:
     - name: "Clone Repository"
       uses: actions/checkout@v2
+
+    - name: "Run Local NetWait Action"
+      uses: ./ghci/actions/netwait
+      with:
+        port: "8080"
 
     - name: "Run Local CI Test Action"
       uses: ./ghci/actions/ghci-osbuild
