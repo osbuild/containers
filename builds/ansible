@@ -7,7 +7,7 @@ RUN echo "fastestmirror=1" >> /etc/dnf/dnf.conf && \
 
 # Install requirements for building RPMs.
 RUN dnf -y upgrade && \
-      dnf -y install ansible git openssh openssh-clients && \
+      dnf -y install ansible git openssh openssh-clients python3-openstackclient python3-openstacksdk && \
       dnf clean all
 
 # Make Ansible happy with arbitrary UID/GID in OpenShift.
