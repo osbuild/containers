@@ -84,7 +84,7 @@ $(BUILDDIR)/%/:
 # unless volatile mode is disabled.
 #
 
-GHCI_CONTAINERS_LABEL = \
+GHCI_CONTAINERS = \
 	ghci-koji \
 	ghci-osbuild \
 	ghci-osbuild-fedmir
@@ -100,25 +100,13 @@ GHCI_TAG_PROPOSED := volatile-$(RANDOM)
 GHCI_TAG ?= $(GHCI_TAG_PROPOSED)
 GHCI_VOLATILE ?= true
 
-GHCI_CONTAINERS_BUILD = $(patsubst %,x-build/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/%,$(GHCI_CONTAINERS_LABEL))
-GHCI_CONTAINERS_CREATE = $(patsubst %,x-create/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/%,$(GHCI_CONTAINERS_LABEL))
-GHCI_CONTAINERS_ALIAS = $(patsubst %,x-alias/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/%,$(GHCI_CONTAINERS_LABEL))
+GHCI_CONTAINERS_ALIAS = $(patsubst %,ghci-alias-%,$(GHCI_CONTAINERS))
+GHCI_CONTAINERS_CREATE = $(patsubst %,ghci-create-%,$(GHCI_CONTAINERS))
+GHCI_CONTAINERS_X_ALIAS = $(patsubst %,x-alias/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/%,$(GHCI_CONTAINERS))
+GHCI_CONTAINERS_X_BUILD = $(patsubst %,x-build/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/%,$(GHCI_CONTAINERS))
+GHCI_CONTAINERS_X_CREATE = $(patsubst %,x-create/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/%,$(GHCI_CONTAINERS))
 
-$(GHCI_CONTAINERS_BUILD): x-build/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/%: .FORCE
-	$(DOCKER) build \
-		--quiet \
-		--tag "$(patsubst x-build/%,%,$@):$(GHCI_TAG)" \
-		$(GHCI_ARGS) \
-		"$(SRCDIR)/ghci/containers/$*"
-
-$(GHCI_CONTAINERS_CREATE): x-create/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/%: .FORCE
-	$(MAKE) "$(patsubst x-create/%,x-build/%,$@)" "GHCI_TAG=$(GHCI_TAG)"
-	[[ "$(GHCI_PUSH)" != "true" ]] || \
-		$(DOCKER) push "$(patsubst x-create/%,%,$@):$(GHCI_TAG)"
-	[[ "$(GHCI_VOLATILE)" != "true" ]] || \
-		$(DOCKER) image rm "$(patsubst x-create/%,%,$@):$(GHCI_TAG)"
-
-$(GHCI_CONTAINERS_ALIAS): x-alias/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/%: .FORCE
+$(GHCI_CONTAINERS_X_ALIAS): x-alias/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/%: .FORCE
 	[[ "$(GHCI_ALIAS_REGISTRY)/$(GHCI_ALIAS_REPOSITORY)/$*:$(GHCI_ALIAS_TAG)" != "$(patsubst x-alias/%,%,$@):$(GHCI_TAG)" ]] || exit 1
 	$(DOCKER) pull \
 		--quiet \
@@ -135,6 +123,20 @@ $(GHCI_CONTAINERS_ALIAS): x-alias/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/%: .FORCE
 			$(DOCKER) image rm "$(patsubst x-alias/%,%,$@):$(GHCI_TAG)" \
 		)
 
+$(GHCI_CONTAINERS_X_BUILD): x-build/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/%: .FORCE
+	$(DOCKER) build \
+		--quiet \
+		--tag "$(patsubst x-build/%,%,$@):$(GHCI_TAG)" \
+		$(GHCI_ARGS) \
+		"$(SRCDIR)/ghci/containers/$*"
+
+$(GHCI_CONTAINERS_X_CREATE): x-create/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/%: .FORCE
+	$(MAKE) "$(patsubst x-create/%,x-build/%,$@)" "GHCI_TAG=$(GHCI_TAG)"
+	[[ "$(GHCI_PUSH)" != "true" ]] || \
+		$(DOCKER) push "$(patsubst x-create/%,%,$@):$(GHCI_TAG)"
+	[[ "$(GHCI_VOLATILE)" != "true" ]] || \
+		$(DOCKER) image rm "$(patsubst x-create/%,%,$@):$(GHCI_TAG)"
+
 x-build/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/ghci-osbuild: GHCI_ARGS= \
 	"--build-arg=CI_PACKAGES=$$(cat $(SRCDIR)/ghci/pkglists/ghci-osbuild)"
 
@@ -143,8 +145,10 @@ x-build/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/ghci-osbuild-fedmir: GHCI_ARGS= \
 	"--build-arg=FEDMIR_PACKAGES=$$(cat $(SRCDIR)/ghci/pkglists/ghci-osbuild-fedmir)" \
 	"--build-arg=FEDMIR_RELEASE=32"
 
-.PHONY: ghci-create
-ghci-create: $(GHCI_CONTAINERS_CREATE)
+.PHONY: ghci-alias ghci-alias-all $(GHCI_CONTAINERS_ALIAS)
+ghci-alias ghci-alias-all: $(GHCI_CONTAINERS_ALIAS)
+$(GHCI_CONTAINERS_ALIAS): ghci-alias-%: x-alias/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/%
 
-.PHONY: ghci-alias
-ghci-alias: $(GHCI_CONTAINERS_ALIAS)
+.PHONY: ghci-create ghci-create-all $(GHCI_CONTAINERS_CREATE)
+ghci-create ghci-create-all: $(GHCI_CONTAINERS_CREATE)
+$(GHCI_CONTAINERS_CREATE): ghci-create-%: x-create/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/%
