@@ -1,3 +1,11 @@
+#
+# ghci-koji - Contained Koji Instance
+#
+# This images provides a Koji instance (Fedora Package Building Infrastructure)
+# together with a PostgreSQL database. It is meant as self-contained solution
+# for testing infrastructure to run against local Koji.
+#
+
 FROM docker.io/library/fedora:latest
 
 # koji db schema is in docs, remove nodocs from from dnf config
