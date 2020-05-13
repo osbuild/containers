@@ -85,6 +85,7 @@ $(BUILDDIR)/%/:
 #
 
 GHCI_CONTAINERS_LABEL = \
+	ghci-koji \
 	ghci-osbuild \
 	ghci-osbuild-fedmir
 
