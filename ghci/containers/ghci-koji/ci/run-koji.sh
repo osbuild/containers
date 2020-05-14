@@ -24,6 +24,9 @@ if ! psql_cmd -c "select * from users" &>/dev/null; then
   psql_cmd -f /usr/share/doc/koji/docs/schema.sql >/dev/null
   psql_cmd -c "insert into users (name, password, status, usertype) values ('kojiadmin', 'kojipass', 0, 0);" >/dev/null
   psql_cmd -c "insert into user_perms (user_id, perm_id, creator_id) values (1, 1, 1);" >/dev/null
+  psql_cmd -c "insert into users (name, password, status, usertype) values ('osbuild', 'osbuildpass', 0, 0);" >/dev/null
+  psql_cmd -c "insert into content_generator (name) values ('osbuild')" >/dev/null
+  psql_cmd -c "insert into cg_users (cg_id, user_id, creator_id, active) values (1, 2, 1, true)" >/dev/null
 fi
 
 # run apache
