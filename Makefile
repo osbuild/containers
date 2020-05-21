@@ -151,6 +151,7 @@ IMG_CONTAINERS = \
 	ghci-osbuild \
 	ghci-osbuild-fedmir \
 	ghrunt \
+	kdc \
 	koji
 
 # Internal variables that cannot be modified by the caller.
