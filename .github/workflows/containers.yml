@@ -1,0 +1,201 @@
+#
+# Container Management
+#
+# This workflow manages the containers in `./src/containers`. It builts images,
+# tags them, and pushes them to their respective registry.
+#
+# By default, the images are only test-built, and immediately discarded. For
+# branches (or tags) prefixed with `img/*` special handling will be applied:
+#
+#     `*`,
+#     `img/*`, `img/*/<name>`:
+#         By default, every branch (unless specified otherwise below) will
+#         trigger a build of all images in `./src/containers/`. The images are
+#         only test-built and then deleted again.
+#
+#         With the `*/<name>` suffix, only the matching container is handled.
+#
+#     `master`,
+#     `img/latest`, `img/latest/<name>`:
+#         After building the images, they are pushed with a `latest<` tag to
+#         their registries.
+#
+#         With the `*/<name>` suffix, only the matching container is handled.
+#
+#     `img/rc`, `img/rc/<name>`:
+#         After building the images, they are pushed with an `rc` tag to
+#         their registries.
+#
+#         With the `*/<name>` suffix, only the matching container is handled.
+#
+#     `img/v<num>`, `img/v<num>/<name>`:
+#         No images are built. Instead, a tag with name `v<num>` is created for
+#         each image, pointing to the same image as the current `rc` tag. These
+#         `v<num>` tags are then pushed the the respective registries.
+#
+#         With the `*/<name>` suffix, only the matching container is handled.
+#
+# Note that image-builds must be carefully crafted to never keep too much data
+# around. The CI will easily run out of disk-space, if we first build all
+# images and then later on push them out. Instead, we must handle each image
+# individually, making sure to delete them immediately when done. To avoid
+# accidental disk-space problems, we try to distribute handling of each image
+# into its own job.
+#
+
+name: "Container Management"
+
+on: [pull_request, push]
+
+jobs:
+  #
+  # Enumerate Containers
+  #
+  # This job runs `make img-list` and provides this output as JSON array
+  # to other jobs. This allows us to dynamically react to additions to the
+  # container list and create new jobs for each container.
+  #
+  enumerate:
+    name: "Enumerate Containers"
+    runs-on: ubuntu-latest
+    outputs:
+      containers: ${{ steps.enumerate.outputs.containers }}
+    steps:
+    - name: "Clone Repository"
+      uses: actions/checkout@v2
+    - name: "Enumerate Containers"
+      id: enumerate
+      run: echo "::set-output name=containers::$(make img-list | jq -Rc . | jq -sc .)"
+    - name: "Print Container List"
+      run: echo '${{ steps.enumerate.outputs.containers }}' | jq .
+
+  #
+  # Build/Push Images
+  #
+  # This builds images and pushes them to the GitHub Packages registry, as well
+  # as mirrors them on `quay.io`, if necessary.
+  #
+  build:
+    name: "Build/Push Images"
+    runs-on: ubuntu-latest
+    needs: enumerate
+    strategy:
+      fail-fast: false
+      matrix:
+        container: ${{ fromJson(needs.enumerate.outputs.containers) }}
+    steps:
+    - name: "Clone Repository"
+      uses: actions/checkout@v2
+    - name: "Authenticate to GitHub Packages"
+      run: docker login docker.pkg.github.com -u '${{ github.actor }}' -p '${{ github.token }}'
+
+      #
+      # Job Variables
+      #
+      #     ${{ steps.vars.outputs.BUILD }}
+      #         Whether to build images.
+      #     ${{ steps.vars.outputs.MIRROR }}
+      #         Whether to mirror on `quay.io`.
+      #     ${{ steps.vars.outputs.PUSH }}
+      #         Whether to push to GitHub-Packages.
+      #     ${{ steps.vars.outputs.RELEASE }}
+      #         Whether to tag a release image.
+      #     ${{ steps.vars.outputs.SKIP }}
+      #         Whether to skip this container.
+      #     ${{ steps.vars.outputs.TAG }}
+      #         Which tag to use for builds/releases.
+      #
+    - name: "Job Variables"
+      id: vars
+      env:
+        GITHUB_REF: ${{ github.ref }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+      run: |
+        GROUP=""
+        NAME=""
+        if [[ "${GITHUB_REF}" =~ ^refs/(heads|tags)/img/[^/]+/[^/]+$ ]] ; then
+          GROUP=$(echo "${GITHUB_REF}" | sed -e 's|.*/.*/.*/\(.*\)/.*|\1|')
+          NAME=$(echo "${GITHUB_REF}" | sed -e 's|.*/.*/.*/.*/\(.*\)|\1|')
+        elif [[ "${GITHUB_REF}" =~ ^refs/(heads|tags)/img/[^/]+$ ]] ; then
+          GROUP=$(echo "${GITHUB_REF}" | sed -e 's|.*/.*/.*/\(.*\)|\1|')
+        fi
+
+        BUILD="true"
+        PUSH="true"
+        RELEASE="false"
+        if [[ "${GITHUB_REF}" = "refs/heads/master" ]] ; then
+          TAG="latest"
+        elif [[ "${GROUP}" = "latest" ]] ; then
+          TAG="latest"
+        elif [[ "${GROUP}" = "rc" ]] ; then
+          TAG="rc"
+        elif [[ "${GROUP}" =~ "^v" ]] ; then
+          BUILD="false"
+          RELEASE="true"
+          TAG="${GROUP}"
+        else
+          PUSH="false"
+          TAG="latest"
+        fi
+
+        SKIP="false"
+        if [[ "${NAME}" != "" && "${NAME}" != '${{ matrix.container }}' ]] ; then
+          SKIP="true"
+        fi
+
+        MIRROR="false"
+        if [[ "${GITHUB_REPOSITORY}" = "osbuild/containers" ]] ; then
+          MIRROR="true"
+        fi
+
+        echo "::set-output name=BUILD::${BUILD}"
+        echo "::set-output name=MIRROR::${MIRROR}"
+        echo "::set-output name=PUSH::${PUSH}"
+        echo "::set-output name=RELEASE::${RELEASE}"
+        echo "::set-output name=SKIP::${SKIP}"
+        echo "::set-output name=TAG::${TAG}"
+    - name: "Print Variables"
+      run: |
+        echo "BUILD: ${{ steps.vars.outputs.BUILD }}"
+        echo "MIRROR: ${{ steps.vars.outputs.MIRROR }}"
+        echo "PUSH: ${{ steps.vars.outputs.PUSH }}"
+        echo "RELEASE: ${{ steps.vars.outputs.RELEASE }}"
+        echo "SKIP: ${{ steps.vars.outputs.SKIP }}"
+        echo "TAG: ${{ steps.vars.outputs.TAG }}"
+
+    - name: "Build and Push Images"
+      if: ${{ steps.vars.outputs.BUILD == 'true' && steps.vars.outputs.SKIP == 'false' }}
+      run: |
+        make \
+          'IMG_PUSH=${{ steps.vars.outputs.PUSH }}' \
+          'IMG_REPOSITORY=${{ github.repository }}' \
+          'IMG_TAG=${{ steps.vars.outputs.TAG }}' \
+          'img-create-${{ matrix.container }}'
+
+    - name: "Release Images"
+      if: ${{ steps.vars.outputs.RELEASE == 'true' && steps.vars.outputs.SKIP == 'false' }}
+      run: |
+        make \
+          'IMG_ALIAS_TAG=commit-${{ github.sha }}' \
+          'IMG_PUSH=${{ steps.vars.outputs.PUSH }}' \
+          'IMG_REPOSITORY=${{ github.repository }}' \
+          'IMG_TAG=rc' \
+          'img-alias-${{ matrix.container }}'
+        make \
+          'IMG_ALIAS_TAG=${{ steps.vars.outputs.TAG }}' \
+          'IMG_PUSH=${{ steps.vars.outputs.PUSH }}' \
+          'IMG_REPOSITORY=${{ github.repository }}' \
+          'IMG_TAG=rc' \
+          'img-alias-${{ matrix.container }}'
+
+    - name: "Mirror Images on Quay.io"
+      if: ${{ steps.vars.outputs.MIRROR == 'true' && steps.vars.outputs.SKIP == 'false' }}
+      run: |
+        docker login quay.io -u 'osbuild+github_actions' -p '${{ secrets.QUAY_TOKEN }}'
+        make \
+          'IMG_ALIAS_REGISTRY=quay.io' \
+          'IMG_ALIAS_REPOSITORY=osbuild' \
+          'IMG_PUSH=${{ steps.vars.outputs.PUSH }}' \
+          'IMG_REPOSITORY=${{ github.repository }}' \
+          'IMG_TAG=${{ steps.vars.outputs.TAG }}' \
+          'img-alias-${{ matrix.container }}'

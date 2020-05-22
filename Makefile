@@ -14,7 +14,7 @@ BUILDDIR ?= .
 SRCDIR ?= .
 
 DOCKER ?= docker
-SHELL = /bin/bash
+SHELL := /bin/bash
 
 #
 # Automatic Variables
@@ -27,8 +27,14 @@ SHELL = /bin/bash
 #         This evaluates to a different random number each time it is used. It
 #         uses the underlying `$RANDOM` variable of the shell.
 #
+#     SPACE:
+#         This evaluates to a single space character. Since this character is
+#         special in GNU-make syntax, this variable can be used to explicitly
+#         insert it as function arguments. Use it only when required.
+#
 
 RANDOM = $(shell echo $$RANDOM)
+SPACE := $(subst ,, )
 
 #
 # Generic Targets
@@ -74,81 +80,154 @@ $(BUILDDIR)/%/:
 .FORCE:
 
 #
-# GHCI Management (GitHub CI)
+# Image Management
 #
 # This implements a bunch of targets that build and push the containers in
-# `./ghci/containers/`. Note that docker always operates on a global namespace,
-# which means any local operations will affect the global image setup and
-# namespace. Therefore, unless specified otherwise, this always uses random
-# tags for all images created. Furthermore, it always discards all images
-# unless volatile mode is disabled.
+# `./src/containers/`. A set of custom make-targets is created to perform
+# a specific operation:
+#
+#     img-alias-<name>:
+#         This is a short-hand for:
+#
+#           x-alias/$(IMG_REGISTRY)/$(IMG_REPOSITORY)/<name>:$(IMG_TAG)
+#
+#     img-build-<name>:
+#         This is a short-hand for:
+#
+#           x-build/$(IMG_REGISTRY)/$(IMG_REPOSITORY)/<name>:$(IMG_TAG)
+#
+#     img-create-<name>:
+#         This is a short-hand for:
+#
+#           x-create/$(IMG_REGISTRY)/$(IMG_REPOSITORY)/<name>:$(IMG_TAG)
+#
+#     img-list:
+#         Print a list of available images the makefile can build. This
+#         effectively prints $(IMG_CONTAINERS) as newline separated list.
+#
+#     x-alias/<registry>/<repo>/<name>
+#         This first pulls the image of the following name:
+#
+#           <registry>/<repo>/<name>:$(IMG_TAG)
+#
+#         Then, it creates an alias for that image. The alias will be called:
+#
+#           $(IMG_ALIAS_REGISTRY)/$(IMG_ALIAS_REPOSITORY)/<name>:$(IMG_ALIAS_TAG)
+#
+#         If $(IMG_PUSH) is `true`, the alias-image is pushed to its registry.
+#         Unless $(IMG_VOLATILE) is `false`, both images will be untagged and
+#         deleted before returning.
+#
+#     x-build/<registry>/<repo>/<name>
+#         This builds the image with name `<name>` (with path
+#         `./src/containers/<name>`. The image will be called:
+#
+#           <registry>/<repo>/<name>:$(IMG_TAG)
+#
+#     x-create/<registry>/<repo>/<name>
+#         This calls into `x-build/...` of the same image. It then pushes the
+#         image to its registry (unless $(IMG_PUSH) is `false`). Furthermore,
+#         if $(IMG_VOLATILE) is `true`, it will immediately untag the image
+#         again and thus delete it.
+#
+# The $(IMG_VOLATILE) knob allows to make the Makefile delete all image tags
+# immediately after the operation is done. This makes sure to keep the disk
+# requirements low and not leave any images around that might exhaust the disk
+# space of CI systems.
+#
+# Furthermore, since docker always operates on a machine-local namespace, a
+# random value in $(IMG_TAG) is used as tag by default. You can override the
+# variable to make use of a specific tag.
 #
 
-GHCI_CONTAINERS = \
+# List of containers we support building. They must exist as a directory in
+# `./src/containers/<name>`. Add additional containers here to make the CI
+# pick them up automatically.
+# You can create symlinks like `./src/containers/<link> -> <name>` and then
+# add custom build-rules below to create multiple containers of the same source
+# files which differ only in the build-arguments (or other configurations).
+IMG_CONTAINERS = \
 	ghci-koji \
 	ghci-osbuild \
 	ghci-osbuild-fedmir
 
-GHCI_ALIAS_REGISTRY ?= $(GHCI_REGISTRY)
-GHCI_ALIAS_REPOSITORY ?= $(GHCI_REPOSITORY)
-GHCI_ALIAS_TAG ?= $(GHCI_TAG)
-GHCI_ARGS =
-GHCI_PUSH ?= false
-GHCI_REGISTRY ?= docker.pkg.github.com
-GHCI_REPOSITORY ?= osbuild/containers
-GHCI_TAG_PROPOSED := volatile-$(RANDOM)
-GHCI_TAG ?= $(GHCI_TAG_PROPOSED)
-GHCI_VOLATILE ?= true
+# Internal variables that cannot be modified by the caller.
+IMG_ARGS =
+IMG_TAG_PROPOSED := volatile-$(RANDOM)
 
-GHCI_CONTAINERS_ALIAS = $(patsubst %,ghci-alias-%,$(GHCI_CONTAINERS))
-GHCI_CONTAINERS_CREATE = $(patsubst %,ghci-create-%,$(GHCI_CONTAINERS))
-GHCI_CONTAINERS_X_ALIAS = $(patsubst %,x-alias/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/%,$(GHCI_CONTAINERS))
-GHCI_CONTAINERS_X_BUILD = $(patsubst %,x-build/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/%,$(GHCI_CONTAINERS))
-GHCI_CONTAINERS_X_CREATE = $(patsubst %,x-create/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/%,$(GHCI_CONTAINERS))
+# These variables control the values to use for image-registries, repositories,
+# tags, etc. They have suitable defaults, but can be overriden by the caller
+# (simply use `make FOO=bar` to override these).
+IMG_ALIAS_REGISTRY ?= $(IMG_REGISTRY)
+IMG_ALIAS_REPOSITORY ?= $(IMG_REPOSITORY)
+IMG_ALIAS_TAG ?= $(IMG_TAG)
+IMG_PUSH ?= false
+IMG_REGISTRY ?= docker.pkg.github.com
+IMG_REPOSITORY ?= osbuild/containers
+IMG_TAG ?= $(IMG_TAG_PROPOSED)
+IMG_VOLATILE ?= true
 
-$(GHCI_CONTAINERS_X_ALIAS): x-alias/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/%: .FORCE
-	[[ "$(GHCI_ALIAS_REGISTRY)/$(GHCI_ALIAS_REPOSITORY)/$*:$(GHCI_ALIAS_TAG)" != "$(patsubst x-alias/%,%,$@):$(GHCI_TAG)" ]] || exit 1
+# List of valid targets. We use these to limit our implicit-rules to a
+# predefined set of targets so we do not accidentally get rules too broad.
+IMG_CONTAINERS_ALIAS = $(patsubst %,img-alias-%,$(IMG_CONTAINERS))
+IMG_CONTAINERS_BUILD = $(patsubst %,img-build-%,$(IMG_CONTAINERS))
+IMG_CONTAINERS_CREATE = $(patsubst %,img-create-%,$(IMG_CONTAINERS))
+IMG_CONTAINERS_X_ALIAS = $(patsubst %,x-alias/$(IMG_REGISTRY)/$(IMG_REPOSITORY)/%,$(IMG_CONTAINERS))
+IMG_CONTAINERS_X_BUILD = $(patsubst %,x-build/$(IMG_REGISTRY)/$(IMG_REPOSITORY)/%,$(IMG_CONTAINERS))
+IMG_CONTAINERS_X_CREATE = $(patsubst %,x-create/$(IMG_REGISTRY)/$(IMG_REPOSITORY)/%,$(IMG_CONTAINERS))
+
+$(IMG_CONTAINERS_X_ALIAS): x-alias/$(IMG_REGISTRY)/$(IMG_REPOSITORY)/%: .FORCE
+	[[ "$(IMG_ALIAS_REGISTRY)/$(IMG_ALIAS_REPOSITORY)/$*:$(IMG_ALIAS_TAG)" != "$(patsubst x-alias/%,%,$@):$(IMG_TAG)" ]] || exit 1
 	$(DOCKER) pull \
 		--quiet \
-		"$(patsubst x-alias/%,%,$@):$(GHCI_TAG)"
+		"$(patsubst x-alias/%,%,$@):$(IMG_TAG)"
 	$(DOCKER) tag \
-		"$(patsubst x-alias/%,%,$@):$(GHCI_TAG)" \
-		"$(GHCI_ALIAS_REGISTRY)/$(GHCI_ALIAS_REPOSITORY)/$*:$(GHCI_ALIAS_TAG)"
-	[[ "$(GHCI_PUSH)" != "true" ]] || \
+		"$(patsubst x-alias/%,%,$@):$(IMG_TAG)" \
+		"$(IMG_ALIAS_REGISTRY)/$(IMG_ALIAS_REPOSITORY)/$*:$(IMG_ALIAS_TAG)"
+	[[ "$(IMG_PUSH)" != "true" ]] || \
 		$(DOCKER) push \
-			"$(GHCI_ALIAS_REGISTRY)/$(GHCI_ALIAS_REPOSITORY)/$*:$(GHCI_ALIAS_TAG)"
-	[[ "$(GHCI_VOLATILE)" != "true" ]] || \
+			"$(IMG_ALIAS_REGISTRY)/$(IMG_ALIAS_REPOSITORY)/$*:$(IMG_ALIAS_TAG)"
+	[[ "$(IMG_VOLATILE)" != "true" ]] || \
 		( \
-			$(DOCKER) image rm "$(GHCI_ALIAS_REGISTRY)/$(GHCI_ALIAS_REPOSITORY)/$*:$(GHCI_ALIAS_TAG)" ; \
-			$(DOCKER) image rm "$(patsubst x-alias/%,%,$@):$(GHCI_TAG)" \
+			$(DOCKER) image rm "$(IMG_ALIAS_REGISTRY)/$(IMG_ALIAS_REPOSITORY)/$*:$(IMG_ALIAS_TAG)" ; \
+			$(DOCKER) image rm "$(patsubst x-alias/%,%,$@):$(IMG_TAG)" \
 		)
 
-$(GHCI_CONTAINERS_X_BUILD): x-build/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/%: .FORCE
+$(IMG_CONTAINERS_X_BUILD): x-build/$(IMG_REGISTRY)/$(IMG_REPOSITORY)/%: .FORCE
 	$(DOCKER) build \
 		--quiet \
-		--tag "$(patsubst x-build/%,%,$@):$(GHCI_TAG)" \
-		$(GHCI_ARGS) \
-		"$(SRCDIR)/ghci/containers/$*"
+		--tag "$(patsubst x-build/%,%,$@):$(IMG_TAG)" \
+		$(IMG_ARGS) \
+		"$(SRCDIR)/src/containers/$*"
 
-$(GHCI_CONTAINERS_X_CREATE): x-create/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/%: .FORCE
-	$(MAKE) "$(patsubst x-create/%,x-build/%,$@)" "GHCI_TAG=$(GHCI_TAG)"
-	[[ "$(GHCI_PUSH)" != "true" ]] || \
-		$(DOCKER) push "$(patsubst x-create/%,%,$@):$(GHCI_TAG)"
-	[[ "$(GHCI_VOLATILE)" != "true" ]] || \
-		$(DOCKER) image rm "$(patsubst x-create/%,%,$@):$(GHCI_TAG)"
+$(IMG_CONTAINERS_X_CREATE): x-create/$(IMG_REGISTRY)/$(IMG_REPOSITORY)/%: .FORCE
+	$(MAKE) "$(patsubst x-create/%,x-build/%,$@)" "IMG_TAG=$(IMG_TAG)"
+	[[ "$(IMG_PUSH)" != "true" ]] || \
+		$(DOCKER) push "$(patsubst x-create/%,%,$@):$(IMG_TAG)"
+	[[ "$(IMG_VOLATILE)" != "true" ]] || \
+		$(DOCKER) image rm "$(patsubst x-create/%,%,$@):$(IMG_TAG)"
 
-x-build/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/ghci-osbuild: GHCI_ARGS= \
-	"--build-arg=CI_PACKAGES=$$(cat $(SRCDIR)/ghci/pkglists/ghci-osbuild)"
+# This sets the `IMG_ARGS` variable for the `ghci-osbuild` container. We pull
+# in the list of packages to install from `./src/pkglists/ghci-osbuild`.
+x-build/$(IMG_REGISTRY)/$(IMG_REPOSITORY)/ghci-osbuild: IMG_ARGS= \
+	"--build-arg=CI_PACKAGES=$$(cat $(SRCDIR)/src/pkglists/ghci-osbuild)"
 
-x-build/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/ghci-osbuild-fedmir: GHCI_ARGS= \
+# This sets the `IMG_ARGS` variable for `ghci-osbuild-fedmir`, setting the
+# expected FEDMIR parameters, as well as pulling in the right package-list.
+x-build/$(IMG_REGISTRY)/$(IMG_REPOSITORY)/ghci-osbuild-fedmir: IMG_ARGS= \
 	"--build-arg=FEDMIR_ARCH=x86_64" \
-	"--build-arg=FEDMIR_PACKAGES=$$(cat $(SRCDIR)/ghci/pkglists/ghci-osbuild-fedmir)" \
+	"--build-arg=FEDMIR_PACKAGES=$$(cat $(SRCDIR)/src/pkglists/ghci-osbuild-fedmir)" \
 	"--build-arg=FEDMIR_RELEASE=32"
 
-.PHONY: ghci-alias ghci-alias-all $(GHCI_CONTAINERS_ALIAS)
-ghci-alias ghci-alias-all: $(GHCI_CONTAINERS_ALIAS)
-$(GHCI_CONTAINERS_ALIAS): ghci-alias-%: x-alias/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/%
+.PHONY: $(IMG_CONTAINERS_ALIAS)
+$(IMG_CONTAINERS_ALIAS): img-alias-%: x-alias/$(IMG_REGISTRY)/$(IMG_REPOSITORY)/%
 
-.PHONY: ghci-create ghci-create-all $(GHCI_CONTAINERS_CREATE)
-ghci-create ghci-create-all: $(GHCI_CONTAINERS_CREATE)
-$(GHCI_CONTAINERS_CREATE): ghci-create-%: x-create/$(GHCI_REGISTRY)/$(GHCI_REPOSITORY)/%
+.PHONY: $(IMG_CONTAINERS_BUILD)
+$(IMG_CONTAINERS_BUILD): img-build-%: x-build/$(IMG_REGISTRY)/$(IMG_REPOSITORY)/%
+
+.PHONY: $(IMG_CONTAINERS_CREATE)
+$(IMG_CONTAINERS_CREATE): img-create-%: x-create/$(IMG_REGISTRY)/$(IMG_REPOSITORY)/%
+
+.PHONY: img-list
+img-list:
+	@echo -e "$(subst $(SPACE),\\n,$(IMG_CONTAINERS))"

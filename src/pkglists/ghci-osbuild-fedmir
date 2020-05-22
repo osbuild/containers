@@ -1,0 +1,12 @@
+@core
+dnf
+dosfstools
+dracut-config-generic
+e2fsprogs
+grub2-pc
+kernel
+policycoreutils
+qemu-img
+systemd
+tar
+xz
