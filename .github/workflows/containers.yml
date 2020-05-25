@@ -129,7 +129,7 @@ jobs:
           TAG="latest"
         elif [[ "${GROUP}" = "rc" ]] ; then
           TAG="rc"
-        elif [[ "${GROUP}" =~ "^v" ]] ; then
+        elif [[ "${GROUP}" =~ ^v ]] ; then
           BUILD="false"
           RELEASE="true"
           TAG="${GROUP}"
