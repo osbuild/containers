@@ -43,18 +43,19 @@ ARG     FEDMIR_PACKAGES
 ARG     FEDMIR_RELEASE
 
 # Prepare our package repository in /srv.
-ENV     FEDMIR_PATH "/srv/www/fedmir/fedora-${FEDMIR_RELEASE}/arch-${FEDMIR_ARCH}/"
-RUN     mkdir -p "${FEDMIR_PATH}"/{packages,root}
+ENV     FEDMIR_PATH "/srv/www/fedmir/fedora-${FEDMIR_RELEASE}/arch-${FEDMIR_ARCH}"
+RUN     mkdir -p "${FEDMIR_PATH}"/{Packages,root}
 
 # Update DNF and install our setup utilities.
 RUN     dnf -y upgrade \
         && dnf -y install \
                 "createrepo" \
+                "findutils" \
         && dnf clean all
 
 # Fetch all packages we want to mirror.
 RUN     dnf -y install \
-                --downloaddir="${FEDMIR_PATH}/packages" \
+                --downloaddir="${FEDMIR_PATH}/Packages" \
                 --downloadonly \
                 --forcearch="${FEDMIR_ARCH}" \
                 --installroot="${FEDMIR_PATH}/root" \
@@ -69,8 +70,19 @@ RUN     dnf -y install \
 # Delete whatever `dnf` put into the `installroot`.
 RUN     rm -rf "${FEDMIR_PATH}/root"
 
+# Move packages into a subdirectory for each starting character.
+RUN     for pkg in "${FEDMIR_PATH}"/Packages/*.rpm ; do \
+                ch="$(echo ${pkg##*/} | head -c 1)" ; \
+                ch="${ch,,}" ; \
+                mkdir -p "${FEDMIR_PATH}/Packages/${ch}" ; \
+                mv "${pkg}" "${FEDMIR_PATH}/Packages/${ch}/" ; \
+        done
+
 # Build repository metadata.
 RUN     createrepo "${FEDMIR_PATH}"
+
+# Provide custom package enumeration.
+RUN     cd "${FEDMIR_PATH}" && find "Packages" -name "*.rpm" >"${FEDMIR_PATH}/pkglist.fedmir.txt"
 
 # Fetch our host environment.
 FROM    "${FEDMIR_HOST}" AS host
