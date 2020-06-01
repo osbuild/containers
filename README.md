@@ -45,7 +45,8 @@ are built but instead the current image with tag `rc` is aliases as `v*` as
 well as the current commit-SHA.
 
 If you commit to the `osbuild/containers` repository, all images when pushed to
-GitHub Packages will also be mirrored on `quay.io` under the `osbuild` group.
+GitHub Packages will also be mirrored on `quay.io` under the `osbuild` group,
+as well as `docker.io` under the `osbuilders` group.
 
 ### Repository:
 
