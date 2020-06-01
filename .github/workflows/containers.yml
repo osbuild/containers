@@ -199,3 +199,15 @@ jobs:
           'IMG_REPOSITORY=${{ github.repository }}' \
           'IMG_TAG=${{ steps.vars.outputs.TAG }}' \
           'img-alias-${{ matrix.container }}'
+
+    - name: "Mirror Images on DockerHub"
+      if: ${{ steps.vars.outputs.MIRROR == 'true' && steps.vars.outputs.SKIP == 'false' }}
+      run: |
+        docker login docker.io -u 'osbuilder' -p '${{ secrets.DOCKERHUB_TOKEN }}'
+        make \
+          'IMG_ALIAS_REGISTRY=docker.io' \
+          'IMG_ALIAS_REPOSITORY=osbuilders' \
+          'IMG_PUSH=${{ steps.vars.outputs.PUSH }}' \
+          'IMG_REPOSITORY=${{ github.repository }}' \
+          'IMG_TAG=${{ steps.vars.outputs.TAG }}' \
+          'img-alias-${{ matrix.container }}'
