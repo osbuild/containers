@@ -50,6 +50,7 @@ try {
                 '/usr/bin/docker',
                 [
                         'run',
+                                '--net=host',
                                 '--privileged',
                                 '--rm',
                                 '--volume=' + arg_cwd + ':/ci/workdir',
