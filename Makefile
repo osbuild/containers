@@ -148,6 +148,7 @@ $(BUILDDIR)/%/:
 # files which differ only in the build-arguments (or other configurations).
 IMG_CONTAINERS = \
 	ghci-koji \
+	ghci-manifestdb \
 	ghci-osbuild \
 	ghci-osbuild-fedmir
 
