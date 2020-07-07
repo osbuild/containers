@@ -208,6 +208,12 @@ $(IMG_CONTAINERS_X_CREATE): x-create/$(IMG_REGISTRY)/$(IMG_REPOSITORY)/%: .FORCE
 	[[ "$(IMG_VOLATILE)" != "true" ]] || \
 		$(DOCKER) image rm "$(patsubst x-create/%,%,$@):$(IMG_TAG)"
 
+# This sets the `IMG_ARGS` variable for the `ghci-manifestdb` container. We
+# pull in the list of packages to install from
+# `./src/pkglists/ghci-manifestdb`.
+x-build/$(IMG_REGISTRY)/$(IMG_REPOSITORY)/ghci-manifestdb: IMG_ARGS= \
+	"--build-arg=CI_PACKAGES=$$(cat $(SRCDIR)/src/pkglists/ghci-manifestdb)"
+
 # This sets the `IMG_ARGS` variable for the `ghci-osbuild` container. We pull
 # in the list of packages to install from `./src/pkglists/ghci-osbuild`.
 x-build/$(IMG_REGISTRY)/$(IMG_REPOSITORY)/ghci-osbuild: IMG_ARGS= \
