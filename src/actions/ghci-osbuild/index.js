@@ -56,6 +56,7 @@ try {
                                 '--volume=/:/ci/host',
                                 '--volume=' + arg_cwd + ':/ci/workdir',
                                 '--volume=/lib/modules/:/lib/modules/',
+                                '--volume=/var/run/docker.sock:/var/run/docker.sock',
                                 arg_image,
                                 '/bin/bash',
                                         '-o', 'errexit',
