@@ -53,6 +53,7 @@ try {
                                 '--net=host',
                                 '--privileged',
                                 '--rm',
+                                '--volume=/:/ci/host',
                                 '--volume=' + arg_cwd + ':/ci/workdir',
                                 '--volume=/lib/modules/:/lib/modules/',
                                 arg_image,
