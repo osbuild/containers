@@ -4,6 +4,7 @@ coreutils
 curl
 dnf
 dnf-plugins-core
+docker
 e2fsprogs
 findutils
 git
