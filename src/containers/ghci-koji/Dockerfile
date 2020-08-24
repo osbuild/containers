@@ -4,11 +4,6 @@
 # This images provides a Koji instance (Fedora Package Building Infrastructure)
 # together with a PostgreSQL database. It is meant as self-contained solution
 # for testing infrastructure to run against local Koji.
-#
-# The following values are currently hard-coded into the image:
-# - admin account:          kojiadmin/kojipass
-# - non-privileged account:  osbuild/osbuildpass
-# - content generator:      osbuild (osbuild user has access to it)
 
 FROM docker.io/library/fedora:latest
 
