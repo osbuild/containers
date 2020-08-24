@@ -150,7 +150,8 @@ IMG_CONTAINERS = \
 	ghci-koji \
 	ghci-manifestdb \
 	ghci-osbuild \
-	ghci-osbuild-fedmir
+	ghci-osbuild-fedmir \
+	ghrunt
 
 # Internal variables that cannot be modified by the caller.
 IMG_ARGS =
