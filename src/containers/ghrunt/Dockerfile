@@ -96,13 +96,19 @@ RUN     tar -xvz -C /ghrunt/runner -f /ghrunt/runner/actions-runner-linux.tar.gz
 RUN     rm /ghrunt/runner/actions-runner-linux.tar.gz
 RUN     /ghrunt/runner/bin/installdependencies.sh
 
-# Configure runtime user.
-RUN     useradd -m ghrunt
-RUN     chown -R ghrunt /ghrunt
-USER    ghrunt
-
 # Import custom sources.
 COPY    src /ghrunt/src
+
+# Configure runtime user.
+#
+# OpenShift-3 runs containers with a randomly generated UID ("for security
+# reasons", ...). They then require everything to be owned by the "root/0"
+# group, because that group is always assigned to the running user. We just try
+# our best to make it work with all those setups...
+RUN     useradd -m -u 2000 ghrunt
+RUN     chown -R 2000:0 /ghrunt
+RUN     chmod -R g=u /ghrunt
+USER    2000
 
 # Configure entrypoint.
 ENTRYPOINT ["/ghrunt/src/entrypoint.py"]
