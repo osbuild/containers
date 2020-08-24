@@ -2,8 +2,34 @@
 # ghci-koji - Contained Koji Instance
 #
 # This images provides a Koji instance (Fedora Package Building Infrastructure)
-# together with a PostgreSQL database. It is meant as self-contained solution
-# for testing infrastructure to run against local Koji.
+# for local testing purposes. User/password and GSSAPI authentication methods
+# are available.
+#
+# Run-time environment variables (all mandatory):
+#
+#   * POSTGRES_HOST      - PostgreSQL hostname
+#   * POSTGRES_USER      - PostgreSQL username
+#   * POSTGRES_PASSWORD  - PostgreSQL password
+#   * POSTGRES_DB        - PostgreSQL database name
+#
+# Also, the user of this container has to provide several files:
+#
+#   * /share/koji.keytab - Kojihub Kerberos keytab, see the next paragraph
+#   * /share/crt.pem     - TLS certificate (for HTTPS)
+#   * /share/key.pem     - TLS private key (for HTTPS)
+#
+# Kojihub Kerberos keytab must contain HTTP/[DOMAIN]@[REALM] principal.
+# DOMAIN must be substituted by a domain name on which the kojihub is running,
+# REALM needs to be substitued with a Kerberos realm name.
+#
+# Note that this principal enables only the newer GSSAPI/SPNEGO authentication
+# (performed by Apache's mod_auth_gssapi module). If you need the legacy
+# "plain" Kerberos authentication, you also need host/kojihub@[REALM]
+#  principal. This authentication method wasn't tested though.
+#
+# See https://docs.pagure.org/koji/server_howto/#principals-and-keytabs for
+# more information.
+#
 
 FROM docker.io/library/fedora:latest
 
@@ -17,6 +43,7 @@ RUN dnf -y upgrade \
             install \
                     koji-hub \
                     postgresql \
+                    mod_ssl \
     && dnf clean all
 
 RUN mkdir -p /mnt/koji/{packages,repos,work,scratch,repos-dist}
