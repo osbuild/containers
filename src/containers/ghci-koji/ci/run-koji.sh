@@ -8,6 +8,8 @@ sed -i  -e "s/.*DBHost =.*/DBHost = ${POSTGRES_HOST}/" \
         -e "s/.*DBName =.*/DBName = ${POSTGRES_DB}/" \
         /etc/koji-hub/hub.conf
 
+sed -i -e "s|LogLevel warn|LogLevel debug|" /etc/httpd/conf/httpd.conf
+
 # wait for postgres to come on-line
 timeout 10 bash -c "until printf '' 2>/dev/null >/dev/tcp/${POSTGRES_HOST}/5432; do sleep 0.1; done"
 
