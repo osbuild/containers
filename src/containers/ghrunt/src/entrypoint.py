@@ -10,6 +10,7 @@ the general setup. This entrypoint registers the runner and spawns it.
 import argparse
 import contextlib
 import json
+import os
 import subprocess
 import sys
 import urllib.request
@@ -35,35 +36,45 @@ class Ghrunt(contextlib.AbstractContextManager):
             "--labels",
             help="Additional labels for the runner (comma separated)",
             metavar="LIST",
-            required=True,
             type=str,
         )
         self._parser.add_argument(
             "--name",
             help="Unique-name of this runner",
             metavar="STRING",
-            required=True,
             type=str,
         )
         self._parser.add_argument(
             "--pat",
             help="Personal Access Token",
             metavar="TOKEN",
-            required=True,
             type=str,
         )
         self._parser.add_argument(
             "--registry",
             help="Organization or repository to register on",
             metavar="ORG/REPO",
-            required=True,
             type=str,
         )
 
         return self._parser.parse_args(self._argv[1:])
 
+    def _parse_env(self):
+        self.args.labels = self.args.labels or os.getenv("GHRUNT_ARG_LABELS", None)
+        self.args.name = self.args.name or os.getenv("GHRUNT_ARG_NAME", None)
+        self.args.pat = self.args.pat or os.getenv("GHRUNT_ARG_PAT", None)
+        self.args.registry = self.args.registry or os.getenv("GHRUNT_ARG_REGISTRY", None)
+
+    def _verify_args(self):
+        assert self.args.labels
+        assert self.args.name
+        assert self.args.pat
+        assert self.args.registry
+
     def __enter__(self):
         self.args = self._parse_args()
+        self._parse_env()
+        self._verify_args()
         return self
 
     def __exit__(self, exc_type, exc_value, exc_tb):
