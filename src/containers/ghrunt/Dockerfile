@@ -85,7 +85,7 @@ RUN     dnf \
         && dnf clean all
 
 # Create working directories.
-RUN     mkdir -p /ghrunt/{src,runner,workdir}
+RUN     mkdir -p /ghrunt/{home,runner,src,workdir}
 
 # Download GitHub-Actions-Runner.
 RUN     curl \
@@ -105,7 +105,7 @@ COPY    src /ghrunt/src
 # reasons", ...). They then require everything to be owned by the "root/0"
 # group, because that group is always assigned to the running user. We just try
 # our best to make it work with all those setups...
-RUN     useradd -m -u 2000 ghrunt
+RUN     useradd -m -d /ghrunt/home -u 2000 ghrunt
 RUN     chown -R 2000:0 /ghrunt
 RUN     chmod -R g=u /ghrunt
 USER    2000
