@@ -186,7 +186,7 @@ class Ghrunt(contextlib.AbstractContextManager):
             self._configure_runner(token)
             print("Configured.")
 
-            print("Execute runner...")
+            print("Execute runner...", flush=True)
             self._spawn_runner()
             print("Finished.")
         finally:
