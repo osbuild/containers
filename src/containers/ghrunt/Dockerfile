@@ -97,7 +97,7 @@ RUN     rm /ghrunt/runner/actions-runner-linux.tar.gz
 RUN     /ghrunt/runner/bin/installdependencies.sh
 
 # Create working directories.
-RUN     mkdir -p /ghrunt/{home,src,workdir}
+RUN     mkdir -p /ghrunt/{src,workdir}
 
 # Import custom sources.
 COPY    src /ghrunt/src
