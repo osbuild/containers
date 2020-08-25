@@ -1,5 +1,5 @@
 #
-# ghci-koji - Contained Koji Instance
+# koji - Contained Koji Instance
 #
 # This images provides a Koji instance (Fedora Package Building Infrastructure)
 # for local testing purposes. User/password and GSSAPI authentication methods

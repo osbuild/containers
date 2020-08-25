@@ -147,11 +147,11 @@ $(BUILDDIR)/%/:
 # add custom build-rules below to create multiple containers of the same source
 # files which differ only in the build-arguments (or other configurations).
 IMG_CONTAINERS = \
-	ghci-koji \
 	ghci-manifestdb \
 	ghci-osbuild \
 	ghci-osbuild-fedmir \
-	ghrunt
+	ghrunt \
+	koji
 
 # Internal variables that cannot be modified by the caller.
 IMG_ARGS =
