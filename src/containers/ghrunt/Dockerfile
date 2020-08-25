@@ -84,8 +84,8 @@ RUN     dnf \
                         "util-linux" \
         && dnf clean all
 
-# Create working directories.
-RUN     mkdir -p /ghrunt/{home,runner,src,workdir}
+# Create runner directory.
+RUN     mkdir -p /ghrunt/runner
 
 # Download GitHub-Actions-Runner.
 RUN     curl \
@@ -95,6 +95,9 @@ RUN     curl \
 RUN     tar -xvz -C /ghrunt/runner -f /ghrunt/runner/actions-runner-linux.tar.gz
 RUN     rm /ghrunt/runner/actions-runner-linux.tar.gz
 RUN     /ghrunt/runner/bin/installdependencies.sh
+
+# Create working directories.
+RUN     mkdir -p /ghrunt/{home,src,workdir}
 
 # Import custom sources.
 COPY    src /ghrunt/src
