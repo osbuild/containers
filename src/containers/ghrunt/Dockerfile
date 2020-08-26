@@ -108,10 +108,11 @@ COPY    src /ghrunt/src
 # reasons", ...). They then require everything to be owned by the "root/0"
 # group, because that group is always assigned to the running user. We just try
 # our best to make it work with all those setups...
-RUN     useradd -m -d /ghrunt/home -u 2000 ghrunt
+RUN     useradd -m -d /ghrunt/home -u 2000 -g 0 ghrunt
 RUN     chown -R 2000:0 /ghrunt
 RUN     chmod -R g=u /ghrunt
 USER    2000
+ENV     HOME "/ghrunt/home"
 
 # Configure entrypoint.
 ENTRYPOINT ["/ghrunt/src/entrypoint.py"]
