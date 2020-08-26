@@ -49,6 +49,7 @@ RUN     dnf \
                 install \
                         "awscli" \
                         "bash" \
+                        "beaker-client" \
                         "ca-certificates" \
                         "coreutils" \
                         "curl" \
@@ -61,6 +62,7 @@ RUN     dnf \
                         "glibc" \
                         "iproute" \
                         "make" \
+                        "origin-clients" \
                         "ostree" \
                         "policycoreutils" \
                         "pylint" \
@@ -76,6 +78,7 @@ RUN     dnf \
                         "rpm-build" \
                         "rpm-ostree" \
                         "rpmdevtools" \
+                        "strace" \
                         "sudo" \
                         "systemd" \
                         "systemd-container" \
