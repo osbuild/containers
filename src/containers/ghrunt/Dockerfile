@@ -99,6 +99,10 @@ RUN     tar -xvz -C /ghrunt/runner -f /ghrunt/runner/actions-runner-linux.tar.gz
 RUN     rm /ghrunt/runner/actions-runner-linux.tar.gz
 RUN     /ghrunt/runner/bin/installdependencies.sh
 
+# Enable sudo for everyone.
+RUN     echo "%wheel ALL=(ALL) NOPASSWD: ALL" >/etc/sudoers.d/rhpsi
+RUN     echo "%root ALL=(ALL) NOPASSWD: ALL" >>/etc/sudoers.d/rhpsi
+
 # Create working directories.
 RUN     mkdir -p /ghrunt/{src,workdir}
 
