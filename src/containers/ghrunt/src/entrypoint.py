@@ -139,7 +139,7 @@ class Ghrunt(contextlib.AbstractContextManager):
         subprocess.run(
             [
                 "tar",
-                "-xvz",
+                "-xz",
                 "-C", "/ghrunt/oci",
                 "-f", "/ghrunt/runner/actions-runner-linux.tar.gz",
             ],
@@ -175,12 +175,19 @@ class Ghrunt(contextlib.AbstractContextManager):
         `run.sh` wrapper script shipped with the Git Hub Runner executable.
         """
 
-        subprocess.run(
-            [
-                "./run.sh"
-            ],
-            check=True,
-        )
+        while True:
+            res = subprocess.run(
+                [
+                    "./run.sh"
+                ],
+                check=False,
+            )
+            print(f"Runner exited with exitcode '{res.returncode}'.")
+            if res.returncode not in [0, 2, 3, 4]:
+                print("Exit.")
+                break
+            else:
+                print("Retry.")
 
     def _remove_runner(self, token):
         """Remove Runner

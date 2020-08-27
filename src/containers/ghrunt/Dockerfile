@@ -61,6 +61,7 @@ RUN     dnf \
                         "git" \
                         "glibc" \
                         "iproute" \
+                        "iputils" \
                         "make" \
                         "origin-clients" \
                         "ostree" \
