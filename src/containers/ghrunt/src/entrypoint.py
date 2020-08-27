@@ -71,10 +71,22 @@ class Ghrunt(contextlib.AbstractContextManager):
         assert self.args.pat
         assert self.args.registry
 
+    def _prepare_user(self):
+        # OpenShift runs containers with a random UID. Prepare a fresh
+        # home-directory, add a `passwd` entry and set the environment up.
+        os.makedirs("/ghrunt/oci", exist_ok=False)
+        os.chdir("/ghrunt/oci")
+        os.environ["HOME"] = "/ghrunt/oci"
+
+        uid = os.getuid()
+        with open("/etc/passwd", "a") as filp:
+            filp.write(f"ghrunt-oci:x:{uid}:0::/ghrunt/oci:/bin/bash\n")
+
     def __enter__(self):
         self.args = self._parse_args()
         self._parse_env()
         self._verify_args()
+        self._prepare_user()
         return self
 
     def __exit__(self, exc_type, exc_value, exc_tb):
@@ -116,6 +128,23 @@ class Ghrunt(contextlib.AbstractContextManager):
             data = json.load(filp)
 
         return data.get("token")
+
+    def _extract_runner(self):
+        """Extract Runner
+
+        Extract the runner application into a new directory, so everything
+        is prepared to be run by our context.
+        """
+
+        subprocess.run(
+            [
+                "tar",
+                "-xvz",
+                "-C", "/ghrunt/oci",
+                "-f", "/ghrunt/runner/actions-runner-linux.tar.gz",
+            ],
+            check=True,
+        )
 
     def _configure_runner(self, token):
         """Configure Runner Application
@@ -180,6 +209,10 @@ class Ghrunt(contextlib.AbstractContextManager):
         print("Acquire token from GitHub...")
         token = self._acquire_token()
         print("Token:", token)
+
+        print("Extract runner...")
+        self._extract_runner()
+        print("Extracted.")
 
         try:
             print("Configure runner...")

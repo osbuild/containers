@@ -88,20 +88,21 @@ RUN     dnf \
         && dnf clean all
 
 # Create runner directory.
-RUN     mkdir -p /ghrunt/runner
+RUN     mkdir -p /ghrunt/runner/pkg
 
 # Download GitHub-Actions-Runner.
 RUN     curl \
                 -L \
                 "https://github.com/actions/runner/releases/download/v${GHRUNT_GH_VERSION}/actions-runner-linux-x64-${GHRUNT_GH_VERSION}.tar.gz" \
                 >/ghrunt/runner/actions-runner-linux.tar.gz
-RUN     tar -xvz -C /ghrunt/runner -f /ghrunt/runner/actions-runner-linux.tar.gz
-RUN     rm /ghrunt/runner/actions-runner-linux.tar.gz
-RUN     /ghrunt/runner/bin/installdependencies.sh
+RUN     tar -xvz -C /ghrunt/runner/pkg -f /ghrunt/runner/actions-runner-linux.tar.gz
+RUN     /ghrunt/runner/pkg/bin/installdependencies.sh
+RUN     rm -rf /ghrunt/runner/pkg
 
 # Enable sudo for everyone.
 RUN     echo "%wheel ALL=(ALL) NOPASSWD: ALL" >/etc/sudoers.d/rhpsi
 RUN     echo "%root ALL=(ALL) NOPASSWD: ALL" >>/etc/sudoers.d/rhpsi
+RUN     chmod -R g=u /etc/passwd
 
 # Create working directories.
 RUN     mkdir -p /ghrunt/{src,workdir}
