@@ -62,6 +62,7 @@ class Ghrunt(contextlib.AbstractContextManager):
     def _parse_env(self):
         self.args.labels = self.args.labels or os.getenv("GHRUNT_ARG_LABELS", None)
         self.args.name = self.args.name or os.getenv("GHRUNT_ARG_NAME", None)
+        self.args.name = self.args.name or os.getenv("HOSTNAME", None)
         self.args.pat = self.args.pat or os.getenv("GHRUNT_ARG_PAT", None)
         self.args.registry = self.args.registry or os.getenv("GHRUNT_ARG_REGISTRY", None)
 
@@ -72,15 +73,12 @@ class Ghrunt(contextlib.AbstractContextManager):
         assert self.args.registry
 
     def _prepare_user(self):
-        # OpenShift runs containers with a random UID. Prepare a fresh
-        # home-directory, add a `passwd` entry and set the environment up.
-        os.makedirs("/ghrunt/oci", exist_ok=False)
-        os.chdir("/ghrunt/oci")
-        os.environ["HOME"] = "/ghrunt/oci"
-
-        uid = os.getuid()
-        with open("/etc/passwd", "a") as filp:
-            filp.write(f"ghrunt-oci:x:{uid}:0::/ghrunt/oci:/bin/bash\n")
+        # Runtimes like OpenShift will invoke the container with a randomly
+        # generated UID. Therefore, we always create a fresh home directory
+        # so permissions are set correctly.
+        os.makedirs("/ghrunt/workdir", exist_ok=False)
+        os.chdir("/ghrunt/workdir")
+        os.environ["HOME"] = "/ghrunt/workdir"
 
     def __enter__(self):
         self.args = self._parse_args()
@@ -140,7 +138,7 @@ class Ghrunt(contextlib.AbstractContextManager):
             [
                 "tar",
                 "-xz",
-                "-C", "/ghrunt/oci",
+                "-C", "/ghrunt/workdir",
                 "-f", "/ghrunt/runner/actions-runner-linux.tar.gz",
             ],
             check=True,
@@ -163,7 +161,7 @@ class Ghrunt(contextlib.AbstractContextManager):
                 "--token", token,
                 "--unattended",
                 "--url", f"https://github.com/{self.args.registry}",
-                "--work", "/ghrunt/workdir",
+                "--work", "/ghrunt/workdir/_work",
             ],
             check=True,
         )
@@ -172,22 +170,10 @@ class Ghrunt(contextlib.AbstractContextManager):
         """Spawn Runner
 
         This synchronously executes the Git Hub Runner application. We use the
-        `run.sh` wrapper script shipped with the Git Hub Runner executable.
+        `runsvc.sh` wrapper script shipped with the Git Hub Runner executable.
         """
 
-        while True:
-            res = subprocess.run(
-                [
-                    "./run.sh"
-                ],
-                check=False,
-            )
-            print(f"Runner exited with exitcode '{res.returncode}'.")
-            if res.returncode not in [0, 2, 3, 4]:
-                print("Exit.")
-                break
-            else:
-                print("Retry.")
+        subprocess.run(["./bin/runsvc.sh"], check=True)
 
     def _remove_runner(self, token):
         """Remove Runner
@@ -213,28 +199,28 @@ class Ghrunt(contextlib.AbstractContextManager):
     def run(self):
         """Run Application"""
 
-        print("Acquire token from GitHub...")
+        print("Acquire token from GitHub...", flush=True)
         token = self._acquire_token()
-        print("Token:", token)
+        print("Token:", token, flush=True)
 
-        print("Extract runner...")
+        print("Extract runner...", flush=True)
         self._extract_runner()
-        print("Extracted.")
+        print("Extracted.", flush=True)
 
         try:
-            print("Configure runner...")
+            print("Configure runner...", flush=True)
             self._configure_runner(token)
-            print("Configured.")
+            print("Configured.", flush=True)
 
             print("Execute runner...", flush=True)
             self._spawn_runner()
-            print("Finished.")
+            print("Finished.", flush=True)
         finally:
-            print("Remove runner...")
+            print("Remove runner...", flush=True)
             self._remove_runner(token)
-            print("Removed.")
+            print("Removed.", flush=True)
 
-        print("Done.")
+        print("Done.", flush=True)
 
 
 if __name__ == "__main__":

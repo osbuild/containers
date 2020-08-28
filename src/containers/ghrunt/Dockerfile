@@ -9,7 +9,8 @@
 # This container simple fetches the latest release from GitHub and
 # unpacks it into a container with all dependencies installed. An
 # entrypoint is provided, which acquires the correct tokens and babysits
-# the runner.
+# the runner. For command-line arguments to the entry-point, see the
+# `--help` output of the entrypoint.
 #
 # Arguments:
 #
@@ -100,15 +101,8 @@ RUN     tar -xvz -C /ghrunt/runner/pkg -f /ghrunt/runner/actions-runner-linux.ta
 RUN     /ghrunt/runner/pkg/bin/installdependencies.sh
 RUN     rm -rf /ghrunt/runner/pkg
 
-# Enable sudo for everyone.
-RUN     echo "%wheel ALL=(ALL) NOPASSWD: ALL" >/etc/sudoers.d/rhpsi
-RUN     echo "%root ALL=(ALL) NOPASSWD: ALL" >>/etc/sudoers.d/rhpsi
-RUN     chmod -R g=u /etc/passwd
-
-# Create working directories.
-RUN     mkdir -p /ghrunt/{src,workdir}
-
 # Import custom sources.
+RUN     mkdir -p /ghrunt/src
 COPY    src /ghrunt/src
 
 # Configure runtime user.
@@ -125,4 +119,4 @@ ENV     HOME "/ghrunt/home"
 
 # Configure entrypoint.
 ENTRYPOINT ["/ghrunt/src/entrypoint.py"]
-WORKDIR /ghrunt/runner
+WORKDIR /ghrunt
