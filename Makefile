@@ -152,7 +152,8 @@ IMG_CONTAINERS = \
 	ghci-osbuild-fedmir \
 	ghrunt \
 	kdc \
-	koji
+	koji \
+	postgres
 
 # Internal variables that cannot be modified by the caller.
 IMG_ARGS =
