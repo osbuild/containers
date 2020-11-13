@@ -220,6 +220,7 @@ x-build/$(IMG_REGISTRY)/$(IMG_REPOSITORY)/ghci-manifestdb: IMG_ARGS= \
 # This sets the `IMG_ARGS` variable for the `ghci-osbuild` container. We pull
 # in the list of packages to install from `./src/pkglists/ghci-osbuild`.
 x-build/$(IMG_REGISTRY)/$(IMG_REPOSITORY)/ghci-osbuild: IMG_ARGS= \
+	"--build-arg=CI_HOST=docker.io/library/fedora:32" \
 	"--build-arg=CI_PACKAGES=$$(cat $(SRCDIR)/src/pkglists/ghci-osbuild)"
 
 # This sets the `IMG_ARGS` variable for `ghci-osbuild-fedmir`, setting the
