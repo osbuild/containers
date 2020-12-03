@@ -20,6 +20,8 @@ python3-docutils
 python3-devel
 python3-jsonschema
 python3-pylint
+python3-pytest
+python3-pytest-cov
 python3-rpm-generators
 python3-rpm-macros
 qemu-img
