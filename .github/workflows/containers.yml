@@ -144,7 +144,7 @@ jobs:
         fi
 
         MIRROR="false"
-        if [[ "${GITHUB_REPOSITORY}" = "osbuild/containers" ]] ; then
+        if [[ ${PUSH} = "true" && "${GITHUB_REPOSITORY}" = "osbuild/containers" ]] ; then
           MIRROR="true"
         fi
 
