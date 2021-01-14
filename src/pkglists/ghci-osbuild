@@ -18,6 +18,7 @@ pylint
 python-rpm-macros
 python3-docutils
 python3-devel
+python3-iniparse
 python3-jsonschema
 python3-pylint
 python3-pytest
