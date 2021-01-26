@@ -1,0 +1,7 @@
+# As default context we provide ./src/
+*
+!src/
+
+# We exclude the GH-actions, as they pull in vendored dependencies and thus
+# can grow in size. Also, the containers do not really need those, anyway.
+src/actions/
