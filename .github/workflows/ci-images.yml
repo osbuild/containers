@@ -37,6 +37,7 @@ jobs:
     name: "Job Configuration"
     runs-on: ubuntu-latest
     outputs:
+      deploy: ${{ steps.parameters.outputs.deploy }}
       images: ${{ steps.parameters.outputs.images }}
     steps:
     - name: "Clone Repository"
@@ -46,17 +47,25 @@ jobs:
       env:
         CTX_GITHUB_EVENT_NAME: ${{ github.event_name }}
         CTX_GITHUB_EVENT_INPUTS_TARGET: ${{ github.event.inputs.target }}
+        IMG_DEPLOY: no
         IMG_TARGET: all-images
       run: |
         if [[ "${CTX_GITHUB_EVENT_NAME}" = "workflow_dispatch" ]] ; then
+          IMG_DEPLOY="yes"
           IMG_TARGET=${CTX_GITHUB_EVENT_INPUTS_TARGET}
         fi
 
+        echo "::set-output name=deploy::${IMG_DEPLOY}"
         echo "::set-output name=images::$(make img-list)"
-    - name: "Print Image List"
+    - name: "Print Parameters"
       env:
+        CTX_STEPS_PARAMETERS_OUTPUTS_DEPLOY: ${{ steps.parameters.outputs.deploy }}
         CTX_STEPS_PARAMETERS_OUTPUTS_IMAGES: ${{ steps.parameters.outputs.images }}
-      run: echo "${CTX_STEPS_PARAMETERS_OUTPUTS_IMAGES}" | jq .
+      run: |
+        echo "Deploy: ${CTX_STEPS_PARAMETERS_OUTPUTS_DEPLOY}"
+        echo "Images:"
+        echo "${CTX_STEPS_PARAMETERS_OUTPUTS_IMAGES}" | jq .
+        echo "End of Images"
 
   #
   # Build/Test Images
@@ -84,17 +93,37 @@ jobs:
       with:
         version: v0.5.1
 
-    - name: "Authenticate to GHCR"
-      if: ${{ github.actor == github.repository_owner }}
-      uses: docker/login-action@v1
-      with:
-        registry: ghcr.io
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.GHCR_PAT }}
-
     - name: "Build Image"
       env:
         IMG_BAKE_ARGS: --load
         IMG_BUILDER: ${{ steps.buildx.outputs.name }}
         IMG_TARGET: ${{ matrix.image }}
       run: make img-bake
+
+    - name: "Authenticate to GHCR"
+      if: ${{ needs.config.outputs.deploy == 'yes' }}
+      uses: docker/login-action@v1
+      with:
+        registry: ghcr.io
+        username: ${{ secrets.GHCR_USER }}
+        password: ${{ secrets.GHCR_TOKEN }}
+
+    - name: "Deploy Image"
+      if: ${{ needs.config.outputs.deploy == 'yes' }}
+      env:
+        IMG_BAKE_ARGS: --push
+        IMG_BUILDER: ${{ steps.buildx.outputs.name }}
+        IMG_TARGET: ${{ matrix.image }}
+      run: make img-bake
+
+    - name: "Authenticate to Quay"
+      if: ${{ needs.config.outputs.deploy == 'yes' }}
+      uses: docker/login-action@v1
+      with:
+        registry: quay.io
+        username: ${{ secrets.QUAY_USER }}
+        password: ${{ secrets.QUAY_TOKEN }}
+
+    - name: "Mirror on Quay"
+      if: ${{ needs.config.outputs.deploy == 'yes' }}
+      run: echo "WIP"
