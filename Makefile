@@ -90,6 +90,7 @@ help:
 	@echo
 	@echo "       img-setup:       Prepare local docker for image builds"
 	@echo "        img-list:       List image targets as JSON array"
+	@echo "        img-tags:       List image tags as JSON array"
 	@echo "        img-bake:       Build images via docker-buildx-bake"
 
 $(BUILDDIR)/:
@@ -147,6 +148,17 @@ img-list:
 		$(IMG_BAKE_ARGS) \
 		$(IMG_TARGET) \
 		| $(BIN_JQ) -c '.target | keys'
+
+.PHONY: img-tags
+img-tags:
+	@$(BIN_DOCKER) \
+		buildx \
+		bake \
+		--builder "$(IMG_BUILDER)" \
+		--print \
+		$(IMG_BAKE_ARGS) \
+		$(IMG_TARGET) \
+		| $(BIN_JQ) -c '[.target[].tags[]]'
 
 .PHONY: img-bake
 img-bake:
