@@ -24,6 +24,38 @@ variable "OSB_UNIQUEID" {
 }
 
 /*
+ * Mirroring
+ *
+ * The custom `mirror()` function takes an image name, an image tag, an
+ * optional tag-suffix, as well as an optional unique suffix. It then produces
+ * an array of tags for all the configured hosts.
+ *
+ * If the unique suffix is not empty, an additional tag with the unique suffix
+ * is added for each host (replacing the specified suffix). In other words,
+ * this function concatenates the configured host with the specified image,
+ * tag, "-" and suffix or unique-suffix. The dash is skipped if the suffix is
+ * empty.
+ */
+
+function "mirror" {
+        params = [image, tag, suffix, unique]
+
+        result = flatten([
+                for host in [
+                        "ghcr.io/osbuild",
+                        "quay.io/osbuild",
+                ] : concat(
+                        notequal(suffix, "") ?
+                                ["${host}/${image}:${tag}-${suffix}"] :
+                                ["${host}/${image}:${tag}"],
+                        notequal(unique, "") ?
+                                ["${host}/${image}:${tag}-${unique}"] :
+                                [],
+                )
+        ])
+}
+
+/*
  * Target Groups
  *
  * The following section defines some custom target groups, which we use in
@@ -81,7 +113,7 @@ target "virtual-platforms" {
 group "all-osbuild-ci" {
         targets = [
                 "osbuild-ci-f32",
-                "osbuild-ci-f33",
+                "osbuild-ci-latest",
         ]
 }
 
@@ -138,6 +170,11 @@ target "virtual-osbuild-ci" {
         ]
 }
 
+/*
+ * We keep building f32 images for osbuild-ci, since we have not yet migrated
+ * the CI to F33. This allows to keep the images up to date, while still
+ * avoiding an upgrade to F33.
+ */
 target "osbuild-ci-f32" {
         args = {
                 OSB_FROM = "docker.io/library/fedora:32",
@@ -145,22 +182,19 @@ target "osbuild-ci-f32" {
         inherits = [
                 "virtual-osbuild-ci",
         ]
-        tags = [
-                "ghcr.io/osbuild/osbuild-ci:f32-latest",
-                notequal(OSB_UNIQUEID, "") ? "ghcr.io/osbuild/osbuild-ci:f32-${OSB_UNIQUEID}" : "",
-        ]
+        tags = concat(
+                mirror("osbuild-ci", "f32", "latest", OSB_UNIQUEID),
+        )
 }
 
-target "osbuild-ci-f33" {
+target "osbuild-ci-latest" {
         args = {
-                OSB_FROM = "docker.io/library/fedora:33",
+                OSB_FROM = "docker.io/library/fedora:latest",
         }
         inherits = [
                 "virtual-osbuild-ci",
         ]
-        tags = [
-                "ghcr.io/osbuild/osbuild-ci:latest",
-                "ghcr.io/osbuild/osbuild-ci:f33-latest",
-                notequal(OSB_UNIQUEID, "") ? "ghcr.io/osbuild/osbuild-ci:f33-${OSB_UNIQUEID}" : "",
-        ]
+        tags = concat(
+                mirror("osbuild-ci", "latest", "", OSB_UNIQUEID),
+        )
 }

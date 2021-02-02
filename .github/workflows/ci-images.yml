@@ -113,7 +113,7 @@ jobs:
       env:
         IMG_BUILDER: ${{ steps.buildx.outputs.name }}
         IMG_TARGET: ${{ matrix.image }}
-      run: make img-tags | jq -c '.[]' | xargs -L1 -- docker push
+      run: make img-tags | jq -c '.[] | select(test("^ghcr.io"))' | xargs -L1 -- docker push
 
     - name: "Authenticate to Quay"
       if: ${{ needs.config.outputs.deploy == 'yes' }}
@@ -128,4 +128,4 @@ jobs:
       env:
         IMG_BUILDER: ${{ steps.buildx.outputs.name }}
         IMG_TARGET: ${{ matrix.image }}
-      run: make img-tags | jq -c '.[] | sub("ghcr.io"; "quay.io")' | xargs -L1 -- docker push
+      run: make img-tags | jq -c '.[] | select(test("^quay.io"))' | xargs -L1 -- docker push
