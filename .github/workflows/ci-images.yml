@@ -111,10 +111,9 @@ jobs:
     - name: "Deploy Image"
       if: ${{ needs.config.outputs.deploy == 'yes' }}
       env:
-        IMG_BAKE_ARGS: --push
         IMG_BUILDER: ${{ steps.buildx.outputs.name }}
         IMG_TARGET: ${{ matrix.image }}
-      run: make img-bake
+      run: make img-tags | jq -c '.[]' | xargs -L1 -- docker push
 
     - name: "Authenticate to Quay"
       if: ${{ needs.config.outputs.deploy == 'yes' }}
@@ -126,4 +125,7 @@ jobs:
 
     - name: "Mirror on Quay"
       if: ${{ needs.config.outputs.deploy == 'yes' }}
-      run: echo "WIP"
+      env:
+        IMG_BUILDER: ${{ steps.buildx.outputs.name }}
+        IMG_TARGET: ${{ matrix.image }}
+      run: make img-tags | jq -c '.[] | sub("ghcr.io"; "quay.io")' | xargs -L1 -- docker push
