@@ -50,6 +50,6 @@ RUN mkdir -p /mnt/koji/{packages,repos,work,scratch,repos-dist}
 
 RUN chown -R apache:apache /mnt/koji
 
-COPY ci/run-koji.sh /ci/
+COPY src/scripts/run-koji.sh /ci/
 
 ENTRYPOINT /ci/run-koji.sh

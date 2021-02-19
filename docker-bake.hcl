@@ -69,6 +69,7 @@ function "mirror" {
 group "all-images" {
         targets = [
                 "all-kdc",
+                "all-koji",
                 "all-osbuild-ci",
                 "all-postgres",
         ]
@@ -132,6 +133,36 @@ target "kdc-latest" {
         ]
         tags = concat(
                 mirror("kdc", "latest", "", OSB_UNIQUEID),
+        )
+}
+
+/*
+ * koji - Koji Build Server
+ *
+ * The following groups and targets build the koji images, a simple way to get
+ * Koji RPM Build Server up and running for testing.
+ */
+
+group "all-koji" {
+        targets = [
+                "koji-latest",
+        ]
+}
+
+target "virtual-koji" {
+        dockerfile = "src/images/koji.Dockerfile"
+        inherits = [
+                "virtual-default",
+                "virtual-platforms",
+        ]
+}
+
+target "koji-latest" {
+        inherits = [
+                "virtual-koji",
+        ]
+        tags = concat(
+                mirror("koji", "latest", "", OSB_UNIQUEID),
         )
 }
 
