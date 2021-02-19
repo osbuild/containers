@@ -1,0 +1,30 @@
+#
+# privdocker - GitHub Actions in Privileged Docker Containers
+#
+# This is a Github-Actions wrapper to run a command in a container, but grant
+# increased privileges.
+#
+
+name: 'privdocker'
+description: 'GitHub Actions in Privileged Docker Containers'
+inputs:
+  image:
+    description: >
+      The image to execute the commands in. Any docker image URL can be
+      specified. The working directory is mounted into `/osb/workdir` before
+      the container is executed. The host root directory is mounted into
+      `/osb/host`.
+
+      This uses `fedora:latest` from DockerHub by default.
+    default: 'docker.io/library/fedora:latest'
+  run:
+    description: >
+      Commands to execute in the container. This is passed to a `bash` shell
+      in the container after all setup operations are done. This is executed
+      with full root privileges through `bash -o errexit -c "ARGS"`.
+
+      This prints "Nothing to do." by default.
+    default: 'echo "Nothing to do."'
+runs:
+  using: 'node12'
+  main: 'index.js'
