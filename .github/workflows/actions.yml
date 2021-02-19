@@ -2,11 +2,10 @@
 # GitHub-Actions CI
 #
 # This workflow runs tests for the github-actions implemented
-# in `./src/actions/`. It runs both the local version, as well as the latest
-# tagged release.
+# in `./src/actions/`.
 #
 
-name: "GitHub-Actions"
+name: "CI for Actions"
 
 on: [pull_request, push]
 
@@ -31,20 +30,10 @@ jobs:
       uses: ./src/actions/netwait
       with:
         port: "8080"
-    - name: "Run Release NetWait Action"
-      uses: osbuild/containers/src/actions/netwait@v1
-      with:
-        port: "8080"
 
-    # Test the GHCI-OSBuild action.
-    - name: "Run Local CI Test Action"
-      uses: ./src/actions/ghci-osbuild
-      with:
-        run: |
-          echo Foo
-          echo Bar
-    - name: "Run Release CI Test Action"
-      uses: osbuild/containers/src/actions/ghci-osbuild@v1
+    # Test the PrivDocker action.
+    - name: "Run Local PrivDocker Action"
+      uses: ./src/actions/privdocker
       with:
         run: |
           echo Foo
