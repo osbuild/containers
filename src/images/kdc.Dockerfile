@@ -29,7 +29,7 @@ RUN dnf -y upgrade \
             install krb5-server \
     && dnf clean all
 
-COPY ci /ci/
+COPY src/scripts/kdc /ci/
 
 ENV KRB5_CONFIG /ci/krb5.conf
 ENV KRB5_KDC_PROFILE /ci/kdc.conf

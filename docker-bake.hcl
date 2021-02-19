@@ -68,8 +68,9 @@ function "mirror" {
 
 group "all-images" {
         targets = [
-                "all-postgres",
+                "all-kdc",
                 "all-osbuild-ci",
+                "all-postgres",
         ]
 }
 
@@ -102,6 +103,36 @@ target "virtual-platforms" {
                  * "linux/s390x",
                  */
         ]
+}
+
+/*
+ * kdc - Kerberos Key Distribution Center
+ *
+ * The following groups and targets build the kdc images, a simple way to get
+ * Kerberos Key Distribution Centers up and running for testing.
+ */
+
+group "all-kdc" {
+        targets = [
+                "kdc-latest",
+        ]
+}
+
+target "virtual-kdc" {
+        dockerfile = "src/images/kdc.Dockerfile"
+        inherits = [
+                "virtual-default",
+                "virtual-platforms",
+        ]
+}
+
+target "kdc-latest" {
+        inherits = [
+                "virtual-kdc",
+        ]
+        tags = concat(
+                mirror("kdc", "latest", "", OSB_UNIQUEID),
+        )
 }
 
 /*
