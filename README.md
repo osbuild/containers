@@ -20,33 +20,43 @@ The requirements for this project are:
 
 ### Build
 
-Images for the containers in `./src/containers/<name>` can be built via the
-rules found in `Makefile`. To build a specific image, use:
+Container images in `./src/images/` are built via Docker BuildKit. The build
+instructions are available in `./docker-bake.hcl`, and can be executed via
+`docker buildx bake`. To build **all** targets, use:
 
 ```sh
-make img-build-<name>
+docker buildx bake all-images
 ```
 
-The repository contains GitHub-Workflows that will automatically build images
-for all containers on every push. If it is built on a branch/tag with name
-`master`, `img/latest`, or `img/latest/<name>`, the image will be pushed to
-the GitHub Packages registry of the repository it is built on (with the image
-tag `latest`).
+Replace `all-images` with a specific target or group if you only want to
+build a subset of all images. The `--print` argument is useful to print the
+build-configuration instead of actually building anything:
 
-The `*/<name>` suffix causes the CI to only consider the matching container.
-This allows having feature-branches for a specific container, and not always
-rebuild all other images.
+```sh
+docker buildx bake --print all-images
+```
 
-Similarly, if you push a branch/tag named `img/rc`, or `img/rc/<name>`, the
-images will be built and pushed, but this time with tag `rc`.
+The CI system will build and verify all images on every PR. However, it will
+not store the images by default. Only if you trigger an explicit deployment
+the images will be stored in a registry. To trigger a deployment, go to the
+`CI for Image Builds` workflow on GitHub:
 
-Lastly, if you push a branch/tag named `img/v*`, or `img/v*/<name>`, no images
-are built but instead the current image with tag `rc` is aliases as `v*` as
-well as the current commit-SHA.
+<https://github.com/osbuild/containers/actions/workflows/ci-images.yml>
 
-If you commit to the `osbuild/containers` repository, all images when pushed to
-GitHub Packages will also be mirrored on `quay.io` under the `osbuild` group,
-as well as `docker.io` under the `osbuilders` group.
+Then click `Run Workflow`, specify the target (or `all-images`) and submit
+it. This will build all images and push them out with a new unique tag. The
+images are stored on the GitHub Container Registry and mirrored on Quay. To
+make use of those images, go to `ghcr.io/osbuild/<image>` and checkout the
+new tag. Alternatively, you can resolve the digest of the `-latest` tags to
+get the digest of the latest build.
+
+Apart from the individual build targets, there are target groups for easier
+selection of a subset of images. Those target groups always start with
+`all-*` and build a set of images. The `all-images` target group, for instance,
+builds all available images. However, check out `./docker-bake.hcl` for other
+target groups. Usually, there will be a `all-<name>` target group corresponding
+to `./src/images/<name>.Dockerfile`, which will build all supported
+configurations of a specific image.
 
 ### Repository:
 
