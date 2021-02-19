@@ -68,6 +68,7 @@ function "mirror" {
 
 group "all-images" {
         targets = [
+                "all-postgres",
                 "all-osbuild-ci",
         ]
 }
@@ -199,5 +200,35 @@ target "osbuild-ci-latest" {
         ]
         tags = concat(
                 mirror("osbuild-ci", "latest", "", OSB_UNIQUEID),
+        )
+}
+
+/*
+ * postgres - PostgreSQL Mirror
+ *
+ * The following groups and targets build the PostgreSQL images. They mostly
+ * just mirror the official images in our own repositories.
+ */
+
+group "all-postgres" {
+        targets = [
+                "postgres-13-alpine",
+        ]
+}
+
+target "virtual-postgres" {
+        dockerfile = "src/images/postgres.Dockerfile"
+        inherits = [
+                "virtual-default",
+                "virtual-platforms",
+        ]
+}
+
+target "postgres-13-alpine" {
+        inherits = [
+                "virtual-postgres",
+        ]
+        tags = concat(
+                mirror("postgres", "13-alpine", "", OSB_UNIQUEID),
         )
 }
