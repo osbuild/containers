@@ -39,6 +39,7 @@ jobs:
     outputs:
       deploy: ${{ steps.parameters.outputs.deploy }}
       images: ${{ steps.parameters.outputs.images }}
+      now: ${{ steps.parameters.outputs.now }}
     steps:
     - name: "Clone Repository"
       uses: actions/checkout@v2
@@ -57,15 +58,18 @@ jobs:
 
         echo "::set-output name=deploy::${IMG_DEPLOY}"
         echo "::set-output name=images::$(make img-list)"
+        echo "::set-output name=now::$(date -u '+%Y%m%d%H%M')"
     - name: "Print Parameters"
       env:
         CTX_STEPS_PARAMETERS_OUTPUTS_DEPLOY: ${{ steps.parameters.outputs.deploy }}
         CTX_STEPS_PARAMETERS_OUTPUTS_IMAGES: ${{ steps.parameters.outputs.images }}
+        CTX_STEPS_PARAMETERS_OUTPUTS_NOW: ${{ steps.parameters.outputs.now }}
       run: |
         echo "Deploy: ${CTX_STEPS_PARAMETERS_OUTPUTS_DEPLOY}"
         echo "Images:"
         echo "${CTX_STEPS_PARAMETERS_OUTPUTS_IMAGES}" | jq .
         echo "End of Images"
+        echo "Now: ${CTX_STEPS_PARAMETERS_OUTPUTS_NOW}"
 
   #
   # Build/Test Images
@@ -81,6 +85,8 @@ jobs:
       fail-fast: false
       matrix:
         image: ${{ fromJson(needs.config.outputs.images) }}
+    env:
+      OSB_UNIQUEID: ${{ needs.config.outputs.now }}
     steps:
     - name: "Clone Repository"
       uses: actions/checkout@v2
