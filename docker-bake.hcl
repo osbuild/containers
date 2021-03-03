@@ -72,6 +72,7 @@ group "all-images" {
                 "all-koji",
                 "all-osbuild-ci",
                 "all-postgres",
+                "all-rpmrepo-ci",
         ]
 }
 
@@ -292,5 +293,46 @@ target "postgres-13-alpine" {
         ]
         tags = concat(
                 mirror("postgres", "13-alpine", "", OSB_UNIQUEID),
+        )
+}
+
+/*
+ * rpmrepo-ci - RPMrepo CI Images
+ *
+ * The following groups and targets build the CI images used by RPMrepo. They
+ * build on the official fedora images.
+ */
+
+group "all-rpmrepo-ci" {
+        targets = [
+                "rpmrepo-ci-latest",
+        ]
+}
+
+target "virtual-rpmrepo-ci" {
+        args = {
+                OSB_DNF_PACKAGES = join(",", [
+                        "python3-boto3",
+                        "python3-botocore",
+                        "python3-pylint",
+                        "python3-pytest",
+                ]),
+        }
+        dockerfile = "src/images/rpmrepo-ci.Dockerfile"
+        inherits = [
+                "virtual-default",
+                "virtual-platforms",
+        ]
+}
+
+target "rpmrepo-ci-latest" {
+        args = {
+                OSB_FROM = "docker.io/library/fedora:latest",
+        }
+        inherits = [
+                "virtual-rpmrepo-ci",
+        ]
+        tags = concat(
+                mirror("rpmrepo-ci", "latest", "", OSB_UNIQUEID),
         )
 }
