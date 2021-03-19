@@ -73,6 +73,7 @@ group "all-images" {
                 "all-osbuild-ci",
                 "all-postgres",
                 "all-rpmrepo-ci",
+                "all-rpmrepo-snapshot",
         ]
 }
 
@@ -334,5 +335,44 @@ target "rpmrepo-ci-latest" {
         ]
         tags = concat(
                 mirror("rpmrepo-ci", "latest", "", OSB_UNIQUEID),
+        )
+}
+
+/*
+ * rpmrepo-snapshot - RPMrepo Snapshot Creation
+ *
+ * The following groups and targets build the snapshot images used by RPMrepo.
+ * They build on the official fedora images.
+ */
+
+group "all-rpmrepo-snapshot" {
+        targets = [
+                "rpmrepo-snapshot-latest",
+        ]
+}
+
+target "virtual-rpmrepo-snapshot" {
+        args = {
+                OSB_DNF_PACKAGES = join(",", [
+                        "python3-boto3",
+                        "python3-devel",
+                ]),
+        }
+        dockerfile = "src/images/rpmrepo-snapshot.Dockerfile"
+        inherits = [
+                "virtual-default",
+                "virtual-platforms",
+        ]
+}
+
+target "rpmrepo-snapshot-latest" {
+        args = {
+                OSB_FROM = "docker.io/library/fedora:latest",
+        }
+        inherits = [
+                "virtual-rpmrepo-snapshot",
+        ]
+        tags = concat(
+                mirror("rpmrepo-snapshot", "latest", "", OSB_UNIQUEID),
         )
 }
