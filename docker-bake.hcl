@@ -356,6 +356,7 @@ target "virtual-rpmrepo-snapshot" {
                 OSB_DNF_PACKAGES = join(",", [
                         "python3-boto3",
                         "python3-devel",
+                        "unzip",
                 ]),
         }
         dockerfile = "src/images/rpmrepo-snapshot.Dockerfile"
