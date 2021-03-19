@@ -33,9 +33,9 @@ ARG             OSB_DNF_PACKAGES=""
 ARG             OSB_DNF_GROUPS=""
 RUN             ./src/scripts/dnf.sh "${OSB_DNF_PACKAGES}" "${OSB_DNF_GROUPS}"
 
-ADD             https://github.com/osbuild/rpmrepo/archive/refs/heads/main.zip main.zip
-RUN             unzip main.zip
-RUN             mv rpmrepo-main ../rpmrepo
+ADD             https://github.com/osbuild/rpmrepo/archive/refs/heads/main.zip src/rpmrepo-main.zip
+RUN             unzip src/rpmrepo-main.zip
+RUN             mv rpmrepo-main rpmrepo
 
 RUN             rm -rf /osb/src
 
