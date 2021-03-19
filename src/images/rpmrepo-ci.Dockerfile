@@ -23,7 +23,7 @@ ARG             OSB_FROM="docker.io/library/fedora:latest"
 FROM            "${OSB_FROM}" AS target
 
 #
-# Import out build sources and prepare the target environment. When finished,
+# Import our build sources and prepare the target environment. When finished,
 # we drop the build sources again, to keep the target image small.
 #
 
