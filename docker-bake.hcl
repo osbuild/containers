@@ -354,6 +354,7 @@ group "all-rpmrepo-snapshot" {
 target "virtual-rpmrepo-snapshot" {
         args = {
                 OSB_DNF_PACKAGES = join(",", [
+                        "dnf-command(reposync)",
                         "python3-boto3",
                         "python3-devel",
                         "unzip",
