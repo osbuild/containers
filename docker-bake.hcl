@@ -355,9 +355,10 @@ target "virtual-rpmrepo-snapshot" {
         args = {
                 OSB_DNF_PACKAGES = join(",", [
                         "dnf-command(reposync)",
+                        "git",
+                        "jq",
                         "python3-boto3",
                         "python3-devel",
-                        "unzip",
                 ]),
         }
         dockerfile = "src/images/rpmrepo-snapshot.Dockerfile"

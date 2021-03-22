@@ -32,10 +32,7 @@ COPY            src src
 ARG             OSB_DNF_PACKAGES=""
 ARG             OSB_DNF_GROUPS=""
 RUN             ./src/scripts/dnf.sh "${OSB_DNF_PACKAGES}" "${OSB_DNF_GROUPS}"
-
-ADD             https://github.com/osbuild/rpmrepo/archive/refs/heads/main.zip src/rpmrepo-main.zip
-RUN             unzip src/rpmrepo-main.zip
-RUN             mv rpmrepo-main rpmrepo
+COPY            src/scripts/rpmrepo-snapshot.sh .
 
 RUN             rm -rf /osb/src
 
@@ -48,3 +45,4 @@ FROM            scratch
 COPY            --from=target . .
 
 WORKDIR         /osb/workdir
+ENTRYPOINT      ["/osb/rpmrepo-snapshot.sh"]
