@@ -93,7 +93,7 @@ python3 -m "src.ctl" \
         --cache "/var/lib/rpmrepo/cache" \
         --local "batch" \
         pull \
-                --base-url "${TARGET_BASEURL}" \
+                --base-url "${TARGET_BASE_URL}" \
                 --platform-id "${TARGET_PLATFORM_ID}"
 
 python3 -m "src.ctl" \
