@@ -354,6 +354,7 @@ group "all-rpmrepo-snapshot" {
 target "virtual-rpmrepo-snapshot" {
         args = {
                 OSB_DNF_PACKAGES = join(",", [
+                        "curl",
                         "dnf-command(reposync)",
                         "git",
                         "jq",
