@@ -213,6 +213,7 @@ target "virtual-osbuild-ci" {
                         "python3-pylint",
                         "python3-pytest",
                         "python3-pytest-cov",
+                        "python3-pyyaml",
                         "python3-rpm-generators",
                         "python3-rpm-macros",
                         "qemu-img",
