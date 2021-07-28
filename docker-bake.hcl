@@ -196,6 +196,7 @@ target "virtual-osbuild-ci" {
                         "git",
                         "glibc",
                         "iproute",
+                        "lvm2",
                         "make",
                         "nbd",
                         "nbd-cli",
