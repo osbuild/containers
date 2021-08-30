@@ -74,6 +74,7 @@ group "all-images" {
                 "all-postgres",
                 "all-rpmrepo-ci",
                 "all-rpmrepo-snapshot",
+                "all-cloud-tools",
         ]
 }
 
@@ -296,6 +297,46 @@ target "postgres-13-alpine" {
         ]
         tags = concat(
                 mirror("postgres", "13-alpine", "", OSB_UNIQUEID),
+        )
+}
+
+/*
+ * cloud-tools - Images with Cloud CLI tools
+ *
+ * The following groups and targets build the "cloud tools" images used by
+ * osbuild-composer CI. They build on the official fedora images.
+ */
+
+group "all-cloud-tools" {
+        targets = [
+                "cloud-tools-latest",
+        ]
+}
+
+target "virtual-cloud-tools" {
+        args = {
+                OSB_DNF_PACKAGES = join(",", [
+                        "google-cloud-sdk",
+                        "azure-cli",
+                        "awscli",
+                ]),
+        }
+        dockerfile = "src/images/cloud-tools.Dockerfile"
+        inherits = [
+                "virtual-default",
+                "virtual-platforms",
+        ]
+}
+
+target "cloud-tools-latest" {
+        args = {
+                OSB_FROM = "docker.io/library/fedora:latest",
+        }
+        inherits = [
+                "virtual-cloud-tools",
+        ]
+        tags = concat(
+                mirror("cloud-tools", "latest", "", OSB_UNIQUEID),
         )
 }
 
