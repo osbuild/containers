@@ -224,6 +224,7 @@ target "virtual-osbuild-ci" {
                         "rpm-build",
                         "rpm-ostree",
                         "rpmdevtools",
+                        "sfdisk",
                         "systemd",
                         "systemd-container",
                         "tar",
