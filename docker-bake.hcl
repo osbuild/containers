@@ -189,6 +189,7 @@ target "virtual-osbuild-ci" {
                         "bash",
                         "bubblewrap",
                         "coreutils",
+                        "cryptsetup",
                         "curl",
                         "dnf",
                         "dnf-plugins-core",
