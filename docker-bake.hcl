@@ -319,6 +319,7 @@ target "virtual-cloud-tools" {
         args = {
                 OSB_DNF_PACKAGES = join(",", [
                         "google-cloud-sdk",
+                        "libxcrypt-compat", 
                         "azure-cli",
                         "awscli",
                 ]),
