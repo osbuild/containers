@@ -226,6 +226,7 @@ target "virtual-osbuild-ci" {
                         "rpm-build",
                         "rpm-ostree",
                         "rpmdevtools",
+                        "skopeo",
                         "systemd",
                         "systemd-container",
                         "tar",
