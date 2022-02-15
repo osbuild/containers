@@ -178,7 +178,6 @@ target "koji-latest" {
 
 group "all-osbuild-ci" {
         targets = [
-                "osbuild-ci-f32",
                 "osbuild-ci-latest",
         ]
 }
@@ -242,23 +241,6 @@ target "virtual-osbuild-ci" {
                 "virtual-default",
                 "virtual-platforms",
         ]
-}
-
-/*
- * We keep building f32 images for osbuild-ci, since we have not yet migrated
- * the CI to F33. This allows to keep the images up to date, while still
- * avoiding an upgrade to F33.
- */
-target "osbuild-ci-f32" {
-        args = {
-                OSB_FROM = "docker.io/library/fedora:32",
-        }
-        inherits = [
-                "virtual-osbuild-ci",
-        ]
-        tags = concat(
-                mirror("osbuild-ci", "f32", "latest", OSB_UNIQUEID),
-        )
 }
 
 target "osbuild-ci-latest" {
