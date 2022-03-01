@@ -305,6 +305,7 @@ target "virtual-cloud-tools" {
                         "libxcrypt-compat", 
                         "azure-cli",
                         "awscli",
+                        "openssh-clients",
                 ]),
         }
         dockerfile = "src/images/cloud-tools.Dockerfile"
