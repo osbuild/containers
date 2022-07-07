@@ -347,6 +347,7 @@ target "virtual-rpmrepo-ci" {
                         "python3-botocore",
                         "python3-pylint",
                         "python3-pytest",
+                        "python3-requests",
                 ]),
         }
         dockerfile = "src/images/rpmrepo-ci.Dockerfile"
