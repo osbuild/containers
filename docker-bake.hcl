@@ -206,6 +206,7 @@ target "virtual-osbuild-ci" {
                         "policycoreutils",
                         "pylint",
                         "python-rpm-macros",
+                        "python3-autopep8",
                         "python3-boto3",
                         "python3-botocore",
                         "python3-docutils",
