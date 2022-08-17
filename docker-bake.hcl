@@ -212,6 +212,7 @@ target "virtual-osbuild-ci" {
                         "python3-docutils",
                         "python3-devel",
                         "python3-iniparse",
+                        "python3-isort",
                         "python3-jsonschema",
                         "python3-mako",
                         "python3-pylint",
