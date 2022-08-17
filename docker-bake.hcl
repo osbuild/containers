@@ -215,6 +215,7 @@ target "virtual-osbuild-ci" {
                         "python3-isort",
                         "python3-jsonschema",
                         "python3-mako",
+                        "python3-mypy",
                         "python3-pylint",
                         "python3-pytest",
                         "python3-pytest-cov",
