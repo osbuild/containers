@@ -271,11 +271,18 @@ group "all-postgres" {
         ]
 }
 
+/*
+ * Currently postgres is the only image that needs
+ * arm64. If this changes, so it doesn't use virtual-platforms
+ */
 target "virtual-postgres" {
         dockerfile = "src/images/postgres.Dockerfile"
         inherits = [
                 "virtual-default",
-                "virtual-platforms",
+        ]
+        platforms = [
+                "linux/amd64",
+                "linux/arm64",
         ]
 }
 
