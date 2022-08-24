@@ -321,7 +321,10 @@ target "virtual-cloud-tools" {
         dockerfile = "src/images/cloud-tools.Dockerfile"
         inherits = [
                 "virtual-default",
-                "virtual-platforms",
+        ]
+        platforms = [
+                "linux/amd64",
+                "linux/arm64",
         ]
 }
 
