@@ -137,6 +137,10 @@ target "kdc-latest" {
         tags = concat(
                 mirror("kdc", "latest", "", OSB_UNIQUEID),
         )
+        platforms = [
+                "linux/amd64",
+                "linux/arm64",
+        ]
 }
 
 /*
