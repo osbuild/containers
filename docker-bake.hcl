@@ -171,6 +171,10 @@ target "koji-latest" {
         tags = concat(
                 mirror("koji", "latest", "", OSB_UNIQUEID),
         )
+        platforms = [
+                "linux/amd64",
+                "linux/arm64",
+        ]
 }
 
 /*
