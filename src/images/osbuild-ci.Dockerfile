@@ -38,6 +38,13 @@ COPY            src/scripts/osbuild-ci.sh .
 RUN             rm -rf /osb/src
 
 #
+# Allow cross-UID git access. Git users must be careful not to invoke git from
+# within untrusted directory-paths.
+#
+
+RUN             git config --global --add safe.directory '*'
+
+#
 # Rebuild from scratch to drop all intermediate layers and keep the final image
 # as small as possible. Then setup the entrypoint.
 #
