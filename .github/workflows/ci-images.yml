@@ -56,9 +56,9 @@ jobs:
           IMG_TARGET=${CTX_GITHUB_EVENT_INPUTS_TARGET}
         fi
 
-        echo "::set-output name=deploy::${IMG_DEPLOY}"
-        echo "::set-output name=images::$(make img-list)"
-        echo "::set-output name=now::$(date -u '+%Y%m%d%H%M')"
+        echo "deploy=${IMG_DEPLOY}" >>$GITHUB_OUTPUT
+        echo "images=$(make img-list)" >>$GITHUB_OUTPUT
+        echo "now=$(date -u '+%Y%m%d%H%M')" >>$GITHUB_OUTPUT
     - name: "Print Parameters"
       env:
         CTX_STEPS_PARAMETERS_OUTPUTS_DEPLOY: ${{ steps.parameters.outputs.deploy }}
