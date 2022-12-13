@@ -70,6 +70,7 @@ group "all-images" {
         targets = [
                 "all-kdc",
                 "all-koji",
+                "all-nfsd",
                 "all-osbuild-ci",
                 "all-postgres",
                 "all-rpmrepo-ci",
@@ -175,6 +176,39 @@ target "koji-latest" {
                 "linux/amd64",
                 "linux/arm64",
         ]
+}
+
+/*
+ * nfsd - NFS Daemon
+ *
+ * The following groups and targets build the nfsd images, a simple
+ * containerized way to export file-systems via NFS.
+ */
+
+group "all-nfsd" {
+        targets = [
+                "nfsd-latest",
+        ]
+}
+
+target "virtual-nfsd" {
+        dockerfile = "src/images/nfsd.Dockerfile"
+        inherits = [
+                "virtual-default",
+                "virtual-platforms",
+        ]
+}
+
+target "nfsd-latest" {
+        args = {
+                OSB_FROM = "docker.io/almalinux/9-init:latest",
+        }
+        inherits = [
+                "virtual-nfsd",
+        ]
+        tags = concat(
+                mirror("nfsd", "latest", "", OSB_UNIQUEID),
+        )
 }
 
 /*
