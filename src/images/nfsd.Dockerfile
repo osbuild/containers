@@ -33,10 +33,10 @@ RUN             mkdir -p /srv/nfsd
 
 # Configure the export-directory in /etc/exports for nfsd to pick up. We set
 # it as default-FS and disable some security configurations that do not apply
-# to containers. Note that root-squashing is enabled by default, though.
+# to containers. Note that root-squashing is disabled by default, though.
 RUN             mkdir -p /etc
 RUN             echo \
-                        "/srv/nfsd *(rw,fsid=0,no_subtree_check,no_auth_nlm,insecure)" \
+                        "/srv/nfsd *(rw,fsid=0,no_root_squash,no_subtree_check,no_auth_nlm,insecure)" \
                         >/etc/exports
 
 # Disable the nfs-server-generator. It is meant to order mount-jobs for exports
