@@ -234,6 +234,7 @@ target "virtual-osbuild-ci" {
                         "curl",
                         "dnf",
                         "dnf-plugins-core",
+                        "dosfstools",
                         "e2fsprogs",
                         "findutils",
                         "git",
