@@ -276,6 +276,7 @@ target "virtual-osbuild-ci" {
                         "systemd",
                         "systemd-container",
                         "tar",
+                        "tox",
                         "util-linux",
                 ]),
                 OSB_DNF_GROUPS = join(",", [
