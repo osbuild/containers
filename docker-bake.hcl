@@ -263,6 +263,7 @@ target "virtual-osbuild-ci" {
                         "python3-iniparse",
                         "python3-isort",
                         "python3-jsonschema",
+                        "python3-librepo",
                         "python3-mako",
                         "python3-mypy",
                         "python3-pip",
