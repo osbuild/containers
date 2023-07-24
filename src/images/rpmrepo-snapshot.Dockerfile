@@ -34,6 +34,12 @@ ARG             OSB_DNF_GROUPS=""
 RUN             ./src/scripts/dnf.sh "${OSB_DNF_PACKAGES}" "${OSB_DNF_GROUPS}"
 COPY            src/scripts/rpmrepo-snapshot.sh .
 
+# This is needed for DNF to be able to verify the TLS cert on some internal repos
+# Embedding the cert in the container has been consulted with RH InfoSec.
+COPY            src/config/2015-IT-Root-CA.pem /etc/pki/ca-trust/source/anchors/2015-IT-Root-CA.pem
+COPY            src/config/2022-IT-Root-CA.pem /etc/pki/ca-trust/source/anchors/2022-IT-Root-CA.pem
+RUN             update-ca-trust
+
 RUN             rm -rf /osb/src
 
 #
