@@ -35,7 +35,7 @@ sed -i  -e "s|^#ServerName.*|ServerName localhost|" \
         /etc/httpd/conf/httpd.conf
 
 # wait for postgres to come on-line
-timeout 10 bash -c "until printf '' 2>/dev/null >/dev/tcp/${POSTGRES_HOST}/5432; do sleep 0.1; done"
+timeout 20 bash -c "until printf '' 2>/dev/null >/dev/tcp/${POSTGRES_HOST}/5432; do sleep 0.1; done"
 
 # psql uses PGPASSWORD env variable
 export PGPASSWORD="${POSTGRES_PASSWORD}"
