@@ -228,6 +228,7 @@ target "virtual-osbuild-ci" {
         args = {
                 OSB_DNF_PACKAGES = join(",", [
                         "bash",
+                        "btrfs-progs",
                         "bubblewrap",
                         "coreutils",
                         "cryptsetup",
