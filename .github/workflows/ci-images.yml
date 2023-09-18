@@ -107,7 +107,7 @@ jobs:
 
     - name: "Authenticate to GHCR"
       if: ${{ needs.config.outputs.deploy == 'yes' }}
-      uses: docker/login-action@v2
+      uses: docker/login-action@v3
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
@@ -115,7 +115,7 @@ jobs:
 
     - name: "Authenticate to Quay"
       if: ${{ needs.config.outputs.deploy == 'yes' }}
-      uses: docker/login-action@v1
+      uses: docker/login-action@v3
       with:
         registry: quay.io
         username: ${{ secrets.QUAY_USER }}
