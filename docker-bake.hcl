@@ -237,6 +237,7 @@ target "virtual-osbuild-ci" {
                         "dnf-plugins-core",
                         "dosfstools",
                         "e2fsprogs",
+                        "erofs-utils",
                         "findutils",
                         "git",
                         "glibc",
