@@ -14,6 +14,8 @@ OSB_IFS=$IFS
 # Parse command-line arguments into local variables. We accept:
 #   @1: Comma-separated list of packages to install.
 #   @2: Comma-separated list of comp-groups to install.
+#   @3: 0 or 1 to enable or disable --allowerasing when installing packages.
+#       Disabled by default. (optional)
 #
 
 if (( $# > 0 )) ; then
@@ -25,9 +27,18 @@ if (( $# > 1 )) ; then
         IFS=$OSB_IFS
 fi
 if (( $# > 2 )) ; then
+        if [[ ! $3 =~ ^[01]$ ]] ; then
+                echo >&2 "ERROR: invalid value for the third argument '$3'"
+                echo >&2 "       only 0 or 1 are allowed"
+                exit 1
+        fi
+fi
+if (( $# > 3 )) ; then
         echo >&2 "ERROR: invalid number of arguments"
         exit 1
 fi
+
+ALLOW_ERASING=${3:-0}
 
 #
 # Clean all caches so we force a metadata refresh. Then make sure to update
@@ -45,11 +56,18 @@ dnf -y upgrade
 # step to keep the number of duplicate installs low.
 #
 
+EXTRA_ARGS=""
+
+if [[ "$ALLOW_ERASING" == 1 ]] ; then
+        EXTRA_ARGS+=" --allowerasing"
+fi
+
 if (( ${#OSB_PACKAGES[@]} )) ; then
         dnf -y \
                 --nodocs \
                 --setopt=fastestmirror=True \
                 --setopt=install_weak_deps=False \
+                $EXTRA_ARGS \
                 install \
                 -- \
                         "${OSB_PACKAGES[@]}"
@@ -60,6 +78,7 @@ if (( ${#OSB_GROUPS[@]} )) ; then
                 --nodocs \
                 --setopt=fastestmirror=True \
                 --setopt=install_weak_deps=False \
+                $EXTRA_ARGS \
                 group install \
                 -- \
                         "${OSB_GROUPS[@]}"
