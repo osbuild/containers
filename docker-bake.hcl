@@ -215,16 +215,29 @@ target "nfsd-latest" {
  * osbuild-ci - OSBuild CI Images
  *
  * The following groups and targets build the CI images used by osbuild. They
- * build on the official fedora images.
+ * build on the official fedora and cXs images.
+ *
+ * The `osbuild-ci-cXs-latest` images are missing some packages, compared to
+ * the `osbuild-ci-latest` image, because they are not available in
+ * the cXs repositories. The intention is to use them only to run unit
+ * tests in osbuild upstream. The Fedora image should be used for all the
+ * other tests, such as linters and running unit tests on multiple Python
+ * versions.
+ *
+ * NB: Docker bake HCL does not support definig arrays as a variable or calling
+ * functions in variable definitions, so we need to duplicate the package list
+ * in Fedora and cXs targets.
  */
 
 group "all-osbuild-ci" {
         targets = [
                 "osbuild-ci-latest",
+                "osbuild-ci-c8s-latest",
+                "osbuild-ci-c9s-latest",
         ]
 }
 
-target "virtual-osbuild-ci" {
+target "virtual-osbuild-ci-base" {
         args = {
                 OSB_DNF_PACKAGES = join(",", [
                         "bash",
@@ -288,7 +301,7 @@ target "virtual-osbuild-ci" {
                         "util-linux",
                 ]),
                 OSB_DNF_GROUPS = join(",", [
-                        "development-tools",
+                        "development tools",
                         "rpm-development-tools",
                 ]),
         }
@@ -301,13 +314,121 @@ target "virtual-osbuild-ci" {
 
 target "osbuild-ci-latest" {
         args = {
-                OSB_FROM = "docker.io/library/fedora:latest",
+                OSB_FROM = "registry.fedoraproject.org/fedora:latest",
         }
         inherits = [
-                "virtual-osbuild-ci",
+                "virtual-osbuild-ci-base",
         ]
         tags = concat(
-                mirror("osbuild-ci", "latest", "", OSB_UNIQUEID),
+                mirror("osbuild-ci-fedora", "latest", "", OSB_UNIQUEID),
+        )
+}
+
+target "virtual-osbuild-ci-cXs" {
+        args = {
+                OSB_DNF_PACKAGES = join(",", [
+                        "bash",
+                        //"btrfs-progs",         // not available in cXs
+                        "bubblewrap",
+                        "coreutils",
+                        "cryptsetup",
+                        "curl",
+                        "dnf",
+                        "dnf-plugins-core",
+                        "dosfstools",
+                        "e2fsprogs",
+                        "findutils",
+                        "git",
+                        "glibc",
+                        "iproute",
+                        "lvm2",
+                        "make",
+                        //"nbd",                 // not available in cXs
+                        //"nbd-cli",             // not available in cXs
+                        "ostree",
+                        //"pacman",              // not available in cXs
+                        "policycoreutils",
+                        //"pylint",              // not available in cXs
+                        "python-rpm-macros",
+                        "python3",               // install just the default version
+                        //"python3.6",
+                        //"python3.7",
+                        //"python3.8",
+                        //"python3.9",
+                        //"python3.10",
+                        //"python3.12",
+                        //"python3-autopep8",    // not available in cXs
+                        //"python3-boto3",       // not available in cXs
+                        //"python3-botocore",    // not available in cXs
+                        //"python3-docutils",    // not available in cXs
+                        "python3-devel",
+                        "python3-iniparse",
+                        //"python3-isort",       // not available in cXs
+                        "python3-jsonschema",
+                        "python3-librepo",
+                        "python3-mako",
+                        //"python3-mypy",        // not available in cXs
+                        "python3-pip",
+                        //"python3-pylint",      // not available in cXs
+                        //"python3-pytest",      // too old in cXs
+                        //"python3-pytest-cov",  // not available in cXs
+                        "python3-pyyaml",
+                        "python3-rpm-generators",
+                        "python3-rpm-macros",
+                        "qemu-img",
+                        //"qemu-system-x86",     // not available in cXs
+                        "rpm",
+                        "rpm-build",
+                        "rpm-ostree",
+                        "rpmdevtools",
+                        "skopeo",
+                        "systemd",
+                        "systemd-container",
+                        "tar",
+                        //"tox",                 // not available in cXs
+                        "util-linux",
+                ]),
+                OSB_PIP_PACKAGES = join(",", [
+                        "autopep8",
+                        "boto3",
+                        "botocore",
+                        "docutils",
+                        "isort",
+                        "mypy",
+                        "pylint",
+                        "pytest",
+                        "pytest-cov",
+                        "tox",
+                ]),
+                OSB_DNF_ALLOW_ERASING = 1,
+        }
+        dockerfile = "src/images/osbuild-ci-cstream.Dockerfile"
+        inherits = [
+                "virtual-osbuild-ci-base",
+        ]
+}
+
+target "osbuild-ci-c8s-latest" {
+        args = {
+                OSB_FROM = "quay.io/centos/centos:stream8",
+        }
+        inherits = [
+                "virtual-osbuild-ci-cXs",
+        ]
+        tags = concat(
+                mirror("osbuild-ci-c8s", "latest", "", OSB_UNIQUEID),
+        )
+}
+
+target "osbuild-ci-c9s-latest" {
+        args = {
+                OSB_FROM = "quay.io/centos/centos:stream9",
+        }
+        inherits = [
+                "virtual-osbuild-ci-cXs",
+        ]
+        tags = concat(
+                mirror("osbuild-ci-c9s", "latest", "", OSB_UNIQUEID),
         )
 }
 
