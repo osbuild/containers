@@ -320,7 +320,7 @@ target "osbuild-ci-latest" {
                 "virtual-osbuild-ci-base",
         ]
         tags = concat(
-                mirror("osbuild-ci-fedora", "latest", "", OSB_UNIQUEID),
+                mirror("osbuild-ci", "latest", "", OSB_UNIQUEID),
         )
 }
 
