@@ -57,7 +57,7 @@ jobs:
         fi
 
         echo "deploy=${IMG_DEPLOY}" >>$GITHUB_OUTPUT
-        echo "images=$(make img-list)" >>$GITHUB_OUTPUT
+        echo "images=$(make list-targets)" >>$GITHUB_OUTPUT
         echo "now=$(date -u '+%Y%m%d%H%M')" >>$GITHUB_OUTPUT
     - name: "Print Parameters"
       env:
@@ -103,7 +103,7 @@ jobs:
       env:
         IMG_BUILDER: ${{ steps.buildx.outputs.name }}
         IMG_TARGET: ${{ matrix.image }}
-      run: make img-bake
+      run: make bake
 
     - name: "Authenticate to GHCR"
       if: ${{ needs.config.outputs.deploy == 'yes' }}
@@ -127,4 +127,5 @@ jobs:
         IMG_BAKE_ARGS: --push
         IMG_BUILDER: ${{ steps.buildx.outputs.name }}
         IMG_TARGET: ${{ matrix.image }}
-      run: make img-bake
+      run: make bake
+

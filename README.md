@@ -20,6 +20,29 @@ The requirements for this project are:
 
 ### Build
 
+This project contains makefile with predefined targets which allows
+easy building of defined images.
+
+If not specified, the default `IMG_TARGET` is set to `osbuild-ci-latest`
+
+Example usage:
+
+```sh
+# Prepare host environment
+make setup-builder
+
+# Show abailable targets
+make list-targets
+
+# Show details of particular target
+make inspect-target IMG_TARGET=osbuild-ci-latest
+
+# Build selected target
+make bake IMG_TARGET=osbuild-ci-latest
+```
+
+### Manual build
+
 Container images in `./src/images/` are built via Docker BuildKit. The build
 instructions are available in `./docker-bake.hcl`, and can be executed via
 `docker buildx bake`. To build **all** targets, use:
