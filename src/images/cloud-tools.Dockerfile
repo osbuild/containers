@@ -36,6 +36,7 @@ ARG             OSB_DNF_GROUPS=""
 COPY            src/config/*.repo /etc/yum.repos.d/
 RUN             ./src/scripts/dnf.sh "${OSB_DNF_PACKAGES}" "${OSB_DNF_GROUPS}"
 RUN             ./src/scripts/install-oci-cli.sh
+RUN             ./src/scripts/install-openshift-cli.sh
 
 RUN             rm -rf /cloud-tools/src
 
