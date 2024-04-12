@@ -26,5 +26,5 @@ inputs:
       This prints "Nothing to do." by default.
     default: 'echo "Nothing to do."'
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'index.js'
