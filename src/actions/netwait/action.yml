@@ -27,5 +27,5 @@ inputs:
       This uses `16` by default.
     default: 16
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'index.js'
