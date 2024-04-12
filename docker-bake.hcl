@@ -387,6 +387,7 @@ target "virtual-osbuild-ci-cXs" {
                         "tar",
                         //"tox",                 // not available in cXs
                         "util-linux",
+                        "fuse-overlayfs",
                 ]),
                 OSB_PIP_PACKAGES = join(",", [
                         "autopep8",
