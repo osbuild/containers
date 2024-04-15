@@ -278,6 +278,7 @@ target "virtual-osbuild-ci-base" {
                         "python3-isort",
                         "python3-jsonschema",
                         "python3-librepo",
+                        "python3-libdnf5",
                         "python3-mako",
                         "python3-mypy",
                         "python3-pip",
