@@ -260,6 +260,7 @@ target "virtual-osbuild-ci-base" {
                         "nbd-cli",
                         "ostree",
                         "pacman",
+			"podman",
                         "policycoreutils",
                         "pylint",
                         "python-rpm-macros",
