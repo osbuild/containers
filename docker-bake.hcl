@@ -234,6 +234,7 @@ group "all-osbuild-ci" {
                 "osbuild-ci-latest",
                 "osbuild-ci-c8s-latest",
                 "osbuild-ci-c9s-latest",
+                "osbuild-ci-c10s-latest",
         ]
 }
 
@@ -433,6 +434,18 @@ target "osbuild-ci-c9s-latest" {
         ]
         tags = concat(
                 mirror("osbuild-ci-c9s", "latest", "", OSB_UNIQUEID),
+        )
+}
+
+target "osbuild-ci-c10s-latest" {
+        args = {
+                OSB_FROM = "quay.io/centos/centos:stream10-development",
+        }
+        inherits = [
+                "virtual-osbuild-ci-cXs",
+        ]
+        tags = concat(
+                mirror("osbuild-ci-c10s", "latest", "", OSB_UNIQUEID),
         )
 }
 
