@@ -232,7 +232,6 @@ target "nfsd-latest" {
 group "all-osbuild-ci" {
         targets = [
                 "osbuild-ci-latest",
-                "osbuild-ci-c8s-latest",
                 "osbuild-ci-c9s-latest",
                 "osbuild-ci-c10s-latest",
         ]
@@ -411,18 +410,6 @@ target "virtual-osbuild-ci-cXs" {
         inherits = [
                 "virtual-osbuild-ci-base",
         ]
-}
-
-target "osbuild-ci-c8s-latest" {
-        args = {
-                OSB_FROM = "quay.io/centos/centos:stream8",
-        }
-        inherits = [
-                "virtual-osbuild-ci-cXs",
-        ]
-        tags = concat(
-                mirror("osbuild-ci-c8s", "latest", "", OSB_UNIQUEID),
-        )
 }
 
 target "osbuild-ci-c9s-latest" {
