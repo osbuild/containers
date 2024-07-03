@@ -64,12 +64,20 @@ git reset --hard "${RPMREPO_COMMIT}"
 # Select the specified target. In case an explicit target is specified, just
 # verify the target configuration exists. If automatic selection is required,
 # list all targets, sort them, and then index them by the requested job index.
+# Note that "snapshots-cache" just builds the list of available repository
+# snapshots and exits, this cache is then used by the enumerate handler.
 #
 
 echo "Selecting target: ${RPMREPO_TARGET}"
 
 TARGET_PATH=""
-if [[ $RPMREPO_TARGET = "auto" ]] ; then
+if [[ $RPMREPO_TARGET = "snapshots-cache" ]]; then
+        python3 -m "src.ctl" \
+                --cache "/var/lib/rpmrepo/cache" \
+                --local "batch" \
+                snapshots-cache
+        exit 0
+elif [[ $RPMREPO_TARGET = "auto" ]] ; then
         TARGET_LIST=($(ls ./repo | sort))
         if (( ${AWS_BATCH_JOB_ARRAY_INDEX} >= ${#TARGET_LIST[@]} )) ; then
                 echo >&2 "WARNING: job index exceeds target list size, nothing to do"
