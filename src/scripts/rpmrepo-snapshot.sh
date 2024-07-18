@@ -71,11 +71,11 @@ git reset --hard "${RPMREPO_COMMIT}"
 echo "Selecting target: ${RPMREPO_TARGET}"
 
 TARGET_PATH=""
-if [[ $RPMREPO_TARGET = "snapshots-cache" ]]; then
+if [[ $RPMREPO_TARGET = "enumerate-cache" ]]; then
         python3 -m "src.ctl" \
                 --cache "/var/lib/rpmrepo/cache" \
                 --local "batch" \
-                snapshots-cache
+                enumerate-cache
         exit 0
 elif [[ $RPMREPO_TARGET = "auto" ]] ; then
         TARGET_LIST=($(ls ./repo | sort))
