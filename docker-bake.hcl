@@ -237,72 +237,76 @@ group "all-osbuild-ci" {
         ]
 }
 
+variable "BASE_PACKAGES" {
+    default = <<EOF
+bash
+btrfs-progs
+bubblewrap
+coreutils
+cryptsetup
+curl
+dnf
+dnf-plugins-core
+dosfstools
+e2fsprogs
+erofs-utils
+findutils
+git
+glibc
+iproute
+lvm2
+make
+nbd
+ostree
+pacman
+podman
+policycoreutils
+pylint
+python-rpm-macros
+python3.6
+python3.8
+python3.9
+python3.10
+python3.12
+python3-autopep8
+python3-boto3
+python3-botocore
+python3-docutils
+python3-devel
+python3-iniparse
+python3-isort
+python3-jsonschema
+python3-librepo
+python3-libdnf5
+python3-mako
+python3-mypy
+python3-pip
+python3-pylint
+python3-pytest
+python3-pytest-cov
+python3-pyyaml
+python3-rpm-generators
+python3-rpm-macros
+qemu-img
+qemu-system-x86
+rpm
+rpm-build
+rpm-ostree
+rpmdevtools
+skopeo
+systemd
+systemd-boot-unsigned
+systemd-container
+tar
+tox
+util-linux
+xfsprogs
+EOF
+}
+
 target "virtual-osbuild-ci-base" {
         args = {
-                OSB_DNF_PACKAGES = join(",", [
-                        "bash",
-                        "btrfs-progs",
-                        "bubblewrap",
-                        "coreutils",
-                        "cryptsetup",
-                        "curl",
-                        "dnf",
-                        "dnf-plugins-core",
-                        "dosfstools",
-                        "e2fsprogs",
-                        "erofs-utils",
-                        "findutils",
-                        "git",
-                        "glibc",
-                        "iproute",
-                        "lvm2",
-                        "make",
-                        "nbd",
-                        "ostree",
-                        "pacman",
-                        "podman",
-                        "policycoreutils",
-                        "pylint",
-                        "python-rpm-macros",
-                        "python3.6",
-                        "python3.8",
-                        "python3.9",
-                        "python3.10",
-                        "python3.12",
-                        "python3-autopep8",
-                        "python3-boto3",
-                        "python3-botocore",
-                        "python3-docutils",
-                        "python3-devel",
-                        "python3-iniparse",
-                        "python3-isort",
-                        "python3-jsonschema",
-                        "python3-librepo",
-                        "python3-libdnf5",
-                        "python3-mako",
-                        "python3-mypy",
-                        "python3-pip",
-                        "python3-pylint",
-                        "python3-pytest",
-                        "python3-pytest-cov",
-                        "python3-pyyaml",
-                        "python3-rpm-generators",
-                        "python3-rpm-macros",
-                        "qemu-img",
-                        "qemu-system-x86",
-                        "rpm",
-                        "rpm-build",
-                        "rpm-ostree",
-                        "rpmdevtools",
-                        "skopeo",
-                        "systemd",
-                        "systemd-boot-unsigned",
-                        "systemd-container",
-                        "tar",
-                        "tox",
-                        "util-linux",
-                        "xfsprogs",
-                ]),
+                OSB_DNF_PACKAGES = join(",", split("\n", BASE_PACKAGES)),
                 OSB_DNF_GROUPS = join(",", [
                         "development tools",
                         "rpm-development-tools",
@@ -327,71 +331,39 @@ target "osbuild-ci-latest" {
         )
 }
 
+// Packages removed from base cXs image due to being not available or deprecated
+variable "CENTOS_REMOVED_PACKAGES" {
+    default = <<EOF
+btrfs-progs
+erofs-utils
+nbd
+nbd-cli
+pacman
+pylint
+python3.6
+python3.7
+python3.8
+python3.9
+python3.10
+python3.12
+python3-autopep8
+python3-boto3
+python3-botocore
+python3-docutils
+python3-isort
+python3-libdnf5
+python3-mypy
+python3-pylint
+python3-pytest
+python3-pytest-cov
+qemu-system-x86
+tox
+EOF
+}
+
 target "virtual-osbuild-ci-cXs" {
         args = {
-                OSB_DNF_PACKAGES = join(",", [
-                        "bash",
-                        //"btrfs-progs",         // not available in cXs
-                        "bubblewrap",
-                        "coreutils",
-                        "cryptsetup",
-                        "curl",
-                        "dnf",
-                        "dnf-plugins-core",
-                        "dosfstools",
-                        "e2fsprogs",
-                        "findutils",
-                        "git",
-                        "glibc",
-                        "iproute",
-                        "lvm2",
-                        "make",
-                        //"nbd",                 // not available in cXs
-                        //"nbd-cli",             // not available in cXs
-                        "ostree",
-                        //"pacman",              // not available in cXs
-                        "policycoreutils",
-                        //"pylint",              // not available in cXs
-                        "python-rpm-macros",
-                        "python3",               // install just the default version
-                        //"python3.6",
-                        //"python3.7",
-                        //"python3.8",
-                        //"python3.9",
-                        //"python3.10",
-                        //"python3.12",
-                        //"python3-autopep8",    // not available in cXs
-                        //"python3-boto3",       // not available in cXs
-                        //"python3-botocore",    // not available in cXs
-                        //"python3-docutils",    // not available in cXs
-                        "python3-devel",
-                        "python3-iniparse",
-                        //"python3-isort",       // not available in cXs
-                        "python3-jsonschema",
-                        "python3-librepo",
-                        "python3-mako",
-                        //"python3-mypy",        // not available in cXs
-                        "python3-pip",
-                        //"python3-pylint",      // not available in cXs
-                        //"python3-pytest",      // too old in cXs
-                        //"python3-pytest-cov",  // not available in cXs
-                        "python3-pyyaml",
-                        "python3-rpm-generators",
-                        "python3-rpm-macros",
-                        "qemu-img",
-                        //"qemu-system-x86",     // not available in cXs
-                        "rpm",
-                        "rpm-build",
-                        "rpm-ostree",
-                        "rpmdevtools",
-                        "skopeo",
-                        "systemd",
-                        "systemd-container",
-                        "tar",
-                        //"tox",                 // not available in cXs
-                        "util-linux",
-                        "fuse-overlayfs",
-                ]),
+                OSB_DNF_PACKAGES = join(",", setsubtract(split("\n", BASE_PACKAGES), split("\n", CENTOS_REMOVED_PACKAGES))),
                 OSB_PIP_PACKAGES = join(",", [
                         "autopep8",
                         "boto3",
@@ -413,24 +385,27 @@ target "virtual-osbuild-ci-cXs" {
 }
 
 target "osbuild-ci-c9s-latest" {
-        args = {
-                OSB_FROM = "quay.io/centos/centos:stream9",
-        }
         inherits = [
                 "virtual-osbuild-ci-cXs",
         ]
+        args = {
+                // DNF package list need to be appended for c9s specific packages
+                OSB_DNF_PACKAGES = format("%s,%s", join(",", setsubtract(split("\n", BASE_PACKAGES), split("\n", CENTOS_REMOVED_PACKAGES))), "python3-tomli")
+                OSB_FROM = "quay.io/centos/centos:stream9",
+        }
         tags = concat(
                 mirror("osbuild-ci-c9s", "latest", "", OSB_UNIQUEID),
         )
 }
 
 target "osbuild-ci-c10s-latest" {
-        args = {
-                OSB_FROM = "quay.io/centos/centos:stream10-development",
-        }
         inherits = [
                 "virtual-osbuild-ci-cXs",
         ]
+        args = {
+                // DNF package list needs no changes so it is inherited
+                OSB_FROM = "quay.io/centos/centos:stream10-development",
+        }
         tags = concat(
                 mirror("osbuild-ci-c10s", "latest", "", OSB_UNIQUEID),
         )
