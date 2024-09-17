@@ -18,6 +18,10 @@
 #       Specify the package groups to install into the container. Separate
 #       groups by comma. By default, no group is pulled in.
 #
+#   * OSB_PIP_PACKAGES=""
+#       Specify the packages to install into the container using pip. Separate
+#       packages by comma. By default, no packages are installed.
+#
 
 ARG             OSB_FROM="docker.io/library/fedora:latest"
 FROM            "${OSB_FROM}" AS target
@@ -32,7 +36,10 @@ COPY            src src
 
 ARG             OSB_DNF_PACKAGES=""
 ARG             OSB_DNF_GROUPS=""
-RUN             ./src/scripts/dnf.sh "${OSB_DNF_PACKAGES}" "${OSB_DNF_GROUPS}"
+ARG             OSB_PIP_PACKAGES=""
+ARG             OSB_DNF_ALLOW_ERASING=""
+RUN             ./src/scripts/dnf.sh "${OSB_DNF_PACKAGES}" "${OSB_DNF_GROUPS}" ${OSB_DNF_ALLOW_ERASING}
+RUN             ./src/scripts/pip.sh "${OSB_PIP_PACKAGES}"
 COPY            src/scripts/osbuild-ci.sh .
 
 RUN             rm -rf /osb/src
