@@ -406,7 +406,7 @@ target "virtual-osbuild-ci-cXs" {
                 ]),
                 OSB_DNF_ALLOW_ERASING = 1,
         }
-        dockerfile = "src/images/osbuild-ci-cstream.Dockerfile"
+        dockerfile = "src/images/osbuild-ci.Dockerfile"
         inherits = [
                 "virtual-osbuild-ci-base",
         ]
