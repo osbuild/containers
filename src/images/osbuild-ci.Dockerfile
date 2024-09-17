@@ -59,5 +59,13 @@ RUN             git config --global --add safe.directory '*'
 FROM            scratch
 COPY            --from=target . .
 
+#
+# Drop the python version for which the python3-dnf package was installed.
+# This is then used in osbuild tests to enable site-packages in the tox
+# environment, when testing using the same python version.
+#
+
+RUN            rpm -ql python3-dnf | grep -E '/usr/lib/python.*/site-packages/dnf/' | cut -d '/' -f 4 | uniq | sed -E 's/python([0-9])\.([0-9]+)/py\1\2/' | tee /osb/libdnf-python-version
+
 WORKDIR         /osb/workdir
 ENTRYPOINT      ["/osb/osbuild-ci.sh"]
