@@ -257,8 +257,10 @@ iproute
 lvm2
 make
 nbd
+openscap-utils
 ostree
 pacman
+parted
 podman
 policycoreutils
 pylint
@@ -301,6 +303,7 @@ systemd-container
 tar
 tox
 util-linux
+veritysetup
 xfsprogs
 EOF
 }
