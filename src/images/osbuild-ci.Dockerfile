@@ -37,8 +37,9 @@ COPY            src src
 ARG             OSB_DNF_PACKAGES=""
 ARG             OSB_DNF_GROUPS=""
 ARG             OSB_PIP_PACKAGES=""
-ARG             OSB_DNF_ALLOW_ERASING=""
-RUN             ./src/scripts/dnf.sh "${OSB_DNF_PACKAGES}" "${OSB_DNF_GROUPS}" ${OSB_DNF_ALLOW_ERASING}
+ARG             OSB_DNF_ALLOW_ERASING="0"
+ARG             OSB_DNF_NOBEST="0"
+RUN             ./src/scripts/dnf.sh "${OSB_DNF_PACKAGES}" "${OSB_DNF_GROUPS}" "${OSB_DNF_ALLOW_ERASING}" "${OSB_DNF_NOBEST}"
 RUN             ./src/scripts/pip.sh "${OSB_PIP_PACKAGES}"
 COPY            src/scripts/osbuild-ci.sh .
 

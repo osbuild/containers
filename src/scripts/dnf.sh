@@ -26,19 +26,24 @@ if (( $# > 1 )) ; then
         IFS=',' read -r -a OSB_GROUPS <<< "$2"
         IFS=$OSB_IFS
 fi
-if (( $# > 2 )) ; then
-        if [[ ! $3 =~ ^[01]$ ]] ; then
-                echo >&2 "ERROR: invalid value for the third argument '$3'"
-                echo >&2 "       only 0 or 1 are allowed"
-                exit 1
-        fi
+if (( $# > 2 )) && [[ ! $3 =~ ^[01]$ ]] ; then
+        echo >&2 "ERROR: invalid value for the third argument '$3'"
+        echo >&2 "       only 0 or 1 are allowed"
+        exit 1
 fi
-if (( $# > 3 )) ; then
+if (( $# > 3 )) && [[ ! $4 =~ ^[01]$ ]] ; then
+        echo >&2 "ERROR: invalid value for the fourth argument '$4'"
+        echo >&2 "       only 0 or 1 are allowed"
+        exit 1
+fi
+
+if (( $# > 4 )) ; then
         echo >&2 "ERROR: invalid number of arguments"
         exit 1
 fi
 
 ALLOW_ERASING=${3:-0}
+NOBEST=${4:-0}
 
 #
 # Clean all caches so we force a metadata refresh. Then make sure to update
@@ -60,6 +65,10 @@ EXTRA_ARGS=""
 
 if [[ "$ALLOW_ERASING" == 1 ]] ; then
         EXTRA_ARGS+=" --allowerasing"
+fi
+
+if [[ "$NOBEST" == 1 ]] ; then
+        EXTRA_ARGS+=" --nobest"
 fi
 
 DNF_VERSION=$(rpm -q --whatprovides dnf --qf "%{VERSION}\n")
