@@ -273,6 +273,7 @@ python3-boto3
 python3-botocore
 python3-docutils
 python3-devel
+python3-dnf
 python3-iniparse
 python3-isort
 python3-jsonschema
