@@ -309,7 +309,7 @@ target "virtual-osbuild-ci-base" {
         args = {
                 OSB_DNF_PACKAGES = join(",", split("\n", BASE_PACKAGES)),
                 OSB_DNF_GROUPS = join(",", [
-                        "development tools",
+                        "development-tools",
                         "rpm-development-tools",
                 ]),
         }
@@ -365,6 +365,10 @@ EOF
 target "virtual-osbuild-ci-cXs" {
         args = {
                 OSB_DNF_PACKAGES = join(",", setsubtract(split("\n", BASE_PACKAGES), split("\n", CENTOS_REMOVED_PACKAGES))),
+                OSB_DNF_GROUPS = join(",", [
+                        "development tools",
+                        "rpm-development-tools",
+                ]),
                 OSB_PIP_PACKAGES = join(",", [
                         "autopep8",
                         "boto3",
