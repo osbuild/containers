@@ -62,6 +62,13 @@ if [[ "$ALLOW_ERASING" == 1 ]] ; then
         EXTRA_ARGS+=" --allowerasing"
 fi
 
+DNF_VERSION=$(rpm -q --whatprovides dnf --qf "%{VERSION}\n")
+POSITIONAL_OPS_DELIMITER="--"
+# We can't use -- with DNF5 until https://github.com/rpm-software-management/dnf5/issues/1848 is fixed.
+if [[ "${DNF_VERSION%%.*}" -ge 5 ]] ; then
+        POSITIONAL_OPS_DELIMITER=""
+fi
+
 if (( ${#OSB_PACKAGES[@]} )) ; then
         dnf -y \
                 --nodocs \
@@ -69,8 +76,7 @@ if (( ${#OSB_PACKAGES[@]} )) ; then
                 --setopt=install_weak_deps=False \
                 $EXTRA_ARGS \
                 install \
-                -- \
-                        "${OSB_PACKAGES[@]}"
+                $POSITIONAL_OPS_DELIMITER "${OSB_PACKAGES[@]}"
 fi
 
 if (( ${#OSB_GROUPS[@]} )) ; then
@@ -80,8 +86,7 @@ if (( ${#OSB_GROUPS[@]} )) ; then
                 --setopt=install_weak_deps=False \
                 $EXTRA_ARGS \
                 group install \
-                -- \
-                        "${OSB_GROUPS[@]}"
+                $POSITIONAL_OPS_DELIMITER "${OSB_GROUPS[@]}"
 fi
 
 #
