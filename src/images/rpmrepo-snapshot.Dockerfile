@@ -18,7 +18,7 @@
 #       groups by comma. By default, no group is pulled in.
 #
 
-ARG             OSB_FROM="docker.io/library/fedora:latest"
+ARG             OSB_FROM="docker.io/library/fedora:40"
 FROM            "${OSB_FROM}" AS target
 
 #
