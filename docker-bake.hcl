@@ -307,6 +307,7 @@ tox
 util-linux
 veritysetup
 xfsprogs
+xorriso
 EOF
 }
 
