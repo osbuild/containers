@@ -253,6 +253,7 @@ erofs-utils
 findutils
 git
 glibc
+grub2-pc-modules
 grub2-tools
 iproute
 lvm2
