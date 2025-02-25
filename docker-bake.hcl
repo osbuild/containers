@@ -284,6 +284,7 @@ python3-isort
 python3-jsonschema
 python3-librepo
 python3-libdnf5
+python3-license-expression
 python3-mako
 python3-mypy
 python3-pip
@@ -361,6 +362,7 @@ python3-botocore
 python3-docutils
 python3-isort
 python3-libdnf5
+python3-license-expression
 python3-mypy
 python3-pylint
 python3-pytest
@@ -383,6 +385,7 @@ target "virtual-osbuild-ci-cXs" {
                         "botocore",
                         "docutils",
                         "isort",
+                        "license_expression",
                         "mypy",
                         "pylint",
                         "pytest",
