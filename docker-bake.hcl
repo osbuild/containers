@@ -268,9 +268,7 @@ policycoreutils
 pylint
 python-rpm-macros
 python3.6
-python3.8
 python3.9
-python3.10
 python3.12
 python3.13
 python3-autopep8
@@ -350,10 +348,7 @@ nbd-cli
 pacman
 pylint
 python3.6
-python3.7
-python3.8
 python3.9
-python3.10
 python3.12
 python3.13
 python3-autopep8
