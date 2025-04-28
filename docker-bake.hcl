@@ -586,7 +586,7 @@ target "virtual-rpmrepo-snapshot" {
 
 target "rpmrepo-snapshot-latest" {
         args = {
-                OSB_FROM = "docker.io/library/fedora:40",
+                OSB_FROM = "docker.io/library/fedora:latest",
         }
         inherits = [
                 "virtual-rpmrepo-snapshot",
