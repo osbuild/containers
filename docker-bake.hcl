@@ -271,6 +271,7 @@ python3.6
 python3.9
 python3.12
 python3.13
+python3.14
 python3-autopep8
 python3-boto3
 python3-botocore
@@ -351,6 +352,7 @@ python3.6
 python3.9
 python3.12
 python3.13
+python3.14
 python3-autopep8
 python3-boto3
 python3-botocore
