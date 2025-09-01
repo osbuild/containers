@@ -530,6 +530,7 @@ target "virtual-rpmrepo-ci" {
                         "python3-pylint",
                         "python3-pytest",
                         "python3-requests",
+                        "python3-yaml",
                 ]),
         }
         dockerfile = "src/images/rpmrepo-ci.Dockerfile"
