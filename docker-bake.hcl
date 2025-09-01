@@ -524,6 +524,7 @@ group "all-rpmrepo-ci" {
 target "virtual-rpmrepo-ci" {
         args = {
                 OSB_DNF_PACKAGES = join(",", [
+                        "make",
                         "python3-boto3",
                         "python3-botocore",
                         "python3-pylint",
