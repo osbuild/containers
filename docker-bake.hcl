@@ -480,10 +480,12 @@ target "virtual-cloud-tools" {
         args = {
                 OSB_DNF_PACKAGES = join(",", [
                         "google-cloud-sdk",
-                        "libxcrypt-compat", 
+                        "libxcrypt-compat",
                         "azure-cli",
                         "awscli",
                         "openssh-clients",
+                        "antlr4",
+                        "python3-antlr4-runtime",
                 ]),
         }
         dockerfile = "src/images/cloud-tools.Dockerfile"
