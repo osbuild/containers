@@ -14,6 +14,9 @@ name: "CI for Image Builds"
 on:
   pull_request:
   push:
+  schedule:
+    # Run every 2 weeks (1st and 15th of each month) at midnight UTC
+    - cron: '0 0 1,15 * *'
   workflow_dispatch:
     inputs:
       target:
@@ -54,6 +57,8 @@ jobs:
         if [[ "${CTX_GITHUB_EVENT_NAME}" = "workflow_dispatch" ]] ; then
           IMG_DEPLOY="yes"
           IMG_TARGET=${CTX_GITHUB_EVENT_INPUTS_TARGET}
+        elif [[ "${CTX_GITHUB_EVENT_NAME}" = "schedule" ]] ; then
+          IMG_DEPLOY="yes"
         fi
 
         echo "deploy=${IMG_DEPLOY}" >>$GITHUB_OUTPUT
