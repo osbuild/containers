@@ -430,7 +430,7 @@ target "osbuild-ci-c10s-latest" {
         ]
         args = {
                 // DNF package list needs no changes so it is inherited
-                OSB_FROM = "quay.io/centos/centos:stream10-development",
+                OSB_FROM = "quay.io/centos/centos:stream10",
                 // Allow DNF to downgrade some packages in the container, otherwise it will fail
                 OSB_DNF_NOBEST = 1,
         }
