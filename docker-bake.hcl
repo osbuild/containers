@@ -249,21 +249,27 @@ variable "BASE_PACKAGES" {
     default = <<EOF
 bash
 btrfs-progs
+btrfs-progs-devel
 bubblewrap
 coreutils
 cryptsetup
 curl
+device-mapper-devel
 dnf
 dnf-plugins-core
 dosfstools
 e2fsprogs
 erofs-utils
 findutils
+gcc
 git
 glibc
+go
+gpgme-devel
 grub2-pc-modules
 grub2-tools
 iproute
+jq
 lvm2
 make
 nbd
@@ -350,6 +356,7 @@ target "osbuild-ci-latest" {
 variable "CENTOS_REMOVED_PACKAGES" {
     default = <<EOF
 btrfs-progs
+btrfs-progs-devel
 erofs-utils
 nbd
 nbd-cli
