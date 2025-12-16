@@ -237,6 +237,14 @@ group "all-osbuild-ci" {
         ]
 }
 
+
+/*
+ * Installed python versions
+ * 3.6 -> RH8
+ * 3.9 -> RH 9 (c9s)
+ * 3.12 -> RH 10 (c10s)
+ * 3.14 -> Latest stable Fedora (43)
+ */
 variable "BASE_PACKAGES" {
     default = <<EOF
 bash
@@ -270,7 +278,6 @@ python-rpm-macros
 python3.6
 python3.9
 python3.12
-python3.13
 python3.14
 python3-autopep8
 python3-boto3
@@ -351,7 +358,6 @@ pylint
 python3.6
 python3.9
 python3.12
-python3.13
 python3.14
 python3-autopep8
 python3-boto3
