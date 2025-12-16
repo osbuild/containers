@@ -134,3 +134,22 @@ jobs:
         IMG_TARGET: ${{ matrix.image }}
       run: make bake
 
+  #
+  # Notify Downstream
+  #
+  # After all images are successfully deployed, trigger a workflow in the
+  # osbuild/osbuild repository to notify it of the updated images.
+  #
+  notify:
+    name: "Notify osbuild/osbuild"
+    runs-on: ubuntu-latest
+    needs: [config, ci]
+    if: ${{ needs.config.outputs.deploy == 'yes' }}
+    steps:
+    - name: "Trigger osbuild/osbuild workflow"
+      uses: peter-evans/repository-dispatch@v3
+      with:
+        token: ${{ secrets.SCHUTZBOT_GITHUB_ACCESS_TOKEN }}
+        repository: osbuild/osbuild
+        event-type: osbuild-ci-images-updated
+        client-payload: '{"unique_id": "${{ needs.config.outputs.now }}"}'
