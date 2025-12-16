@@ -16,6 +16,9 @@ OSB_IFS=$IFS
 #   @2: Comma-separated list of comp-groups to install.
 #   @3: 0 or 1 to enable or disable --allowerasing when installing packages.
 #       Disabled by default. (optional)
+#   @4: 0 or 1 to enable or disable --nobest when installing packages.
+#       Disabled by default. (optional)
+#   @5: Comma-separated list of repository IDs to enable. (optional)
 #
 
 if (( $# > 0 )) ; then
@@ -36,8 +39,12 @@ if (( $# > 3 )) && [[ ! $4 =~ ^[01]$ ]] ; then
         echo >&2 "       only 0 or 1 are allowed"
         exit 1
 fi
-
 if (( $# > 4 )) ; then
+        IFS=',' read -r -a OSB_ENABLE_REPOS <<< "$5"
+        IFS=$OSB_IFS
+fi
+
+if (( $# > 5 )) ; then
         echo >&2 "ERROR: invalid number of arguments"
         exit 1
 fi
@@ -70,6 +77,10 @@ fi
 if [[ "$NOBEST" == 1 ]] ; then
         EXTRA_ARGS+=" --nobest"
 fi
+
+for repo in "${OSB_ENABLE_REPOS[@]}" ; do
+        EXTRA_ARGS+=" --enablerepo=$repo"
+done
 
 DNF_VERSION=$(rpm -q --whatprovides dnf --qf "%{VERSION}\n")
 POSITIONAL_OPS_DELIMITER="--"
