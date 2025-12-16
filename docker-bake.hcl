@@ -403,6 +403,7 @@ target "virtual-osbuild-ci-cXs" {
                         "tox",
                 ]),
                 OSB_DNF_ALLOW_ERASING = 1,
+                OSB_DNF_ENABLE_REPOS = "crb",
         }
         dockerfile = "src/images/osbuild-ci.Dockerfile"
         inherits = [
