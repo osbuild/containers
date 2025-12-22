@@ -147,7 +147,7 @@ jobs:
     if: ${{ needs.config.outputs.deploy == 'yes' }}
     steps:
     - name: "Trigger osbuild/osbuild workflow"
-      uses: peter-evans/repository-dispatch@v3
+      uses: peter-evans/repository-dispatch@v4
       with:
         token: ${{ secrets.SCHUTZBOT_GITHUB_ACCESS_TOKEN }}
         repository: osbuild/osbuild
