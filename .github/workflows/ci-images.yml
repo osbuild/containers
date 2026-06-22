@@ -45,7 +45,7 @@ jobs:
       now: ${{ steps.parameters.outputs.now }}
     steps:
     - name: "Clone Repository"
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
     - name: "Determine Build Parameters"
       id: parameters
       env:
@@ -94,7 +94,7 @@ jobs:
       OSB_UNIQUEID: ${{ needs.config.outputs.now }}
     steps:
     - name: "Clone Repository"
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
     - name: "Prepare QEMU Emulators"
       uses: docker/setup-qemu-action@v4
