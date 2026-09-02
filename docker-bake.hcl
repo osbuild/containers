@@ -609,4 +609,8 @@ target "rpmrepo-snapshot-latest" {
         tags = concat(
                 mirror("rpmrepo-snapshot", "latest", "", OSB_UNIQUEID),
         )
+        platforms = [
+                "linux/amd64",
+                "linux/arm64",
+        ]
 }
