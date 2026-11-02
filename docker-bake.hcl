@@ -312,6 +312,7 @@ rpm
 rpm-build
 rpm-ostree
 rpmdevtools
+scap-security-guide
 skopeo
 systemd
 systemd-boot-unsigned
